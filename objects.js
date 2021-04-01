@@ -10,6 +10,9 @@ function lineangle(xa, ya, xb, yb){
 	return Math.atan2((ya-yb), (xa-xb));
 }
 
+let nodeidcounter = 0;
+let edgeidcounter = 0;
+
 class node{
 	constructor(x, y, r){
 		this.x = x;
@@ -18,7 +21,7 @@ class node{
 		this.hue = 0;	
 		this.saturation = 100;
 		this.lightness = 50;
-		this.label = "A";
+		this.label = "";
 	}
 
 	draw(){
@@ -49,11 +52,11 @@ class edge{
 		this.lightness = 50;
 		
 		this.direction = 2; 
-			//	0: u -> v 
+			//	0: u -> v
 			//	1: u <- v
-			//	2: u <-> v
+			//	2: u - v
 
-		this.label = "A";
+		this.label = "";
 	}
 
 	draw(){
@@ -97,6 +100,7 @@ class graph{
 	addnode(x, y, r){
 		let n = new node(x, y, r);
 		this.nodes.push(n);
+		// print(this)
 	}
 
 	addegde(u, v){
@@ -104,6 +108,16 @@ class graph{
 			let e = new edge(this.nodes[u], this.nodes[v]);
 			this.edges.push(e);
 		}
+		// print(this)
+	}
+
+	adddirectedegde(u, v){
+		if(u != v){
+			let e = new edge(this.nodes[u], this.nodes[v]);
+			e.direction = 0;
+			this.edges.push(e);
+		}
+		// print(this)
 	}
 
 	removenode(){
@@ -117,6 +131,7 @@ class graph{
 			this.nodes.splice(this.selectednode, 1);
 			this.selectednode = -1;
 		}
+		// print(this)
 	}
 
 	removeedge(){
@@ -124,6 +139,7 @@ class graph{
 			this.edges.splice(this.selectededge, 1);
 			this.selectededge = -1;
 		}
+		// print(this)
 	}
 
 	selectnode(x, y){
