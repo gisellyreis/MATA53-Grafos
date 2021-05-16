@@ -26,7 +26,7 @@ class node {
         fill(this.hue, this.saturation, this.lightness); noStroke();
         ellipse(this.x, this.y, this.r, this.r);
 
-        fill(90); stroke(0);
+        fill(90); stroke(0); strokeWeight(2);
         text(this.label, this.x, this.y);
     }
 
@@ -84,7 +84,7 @@ class edge {
             line(borderpoint.x, borderpoint.y, borderpoint.x - Math.cos(angle - Math.PI / 6) * 15, borderpoint.y - Math.sin(angle - Math.PI / 6) * 15);
         }
 
-        fill(90); stroke(0);
+        fill(90); stroke(0); strokeWeight(2);
         text(this.label, min(this.u.x, this.v.x) + abs(this.u.x - this.v.x) / 2, min(this.u.y, this.v.y) + abs(this.u.y - this.v.y) / 2);
     }
 
@@ -114,7 +114,27 @@ class graph {
         this.edges = [];
         this.selectedelement = -1; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
         this.selectedindex = -1; // index of the selected element in the according type's array
-        this.selectedhue = 0;
+        this.locked = false;
+    }
+
+    lock() {
+        this.locked = true;
+    }
+
+    unlock() {
+        this.locked = false;
+    }
+
+    get_edge_index(u, v) {
+        for (let i = 0; i < this.edges.length; i++) {
+            if (
+                this.nodes.indexOf(this.edges[i].u) == u && this.nodes.indexOf(this.edges[i].v) == v ||
+                this.nodes.indexOf(this.edges[i].u) == v && this.nodes.indexOf(this.edges[i].v) == u
+            ) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     addnode(x, y, r) {
@@ -127,10 +147,10 @@ class graph {
         if (u != v) {
             for (let i = 0; i < this.edges.length; i++) {
                 if (this.edges[i].u == u && this.edges[i].v == v) {
-                    console.log("already added edge");
+                    warn("already added edge");
                     return;
                 } else if (this.edges[i].u == v && this.edges[i].v == u) {
-                    console.log("already added edge");
+                    warn("already added edge");
                     return;
                 }
             }
@@ -144,10 +164,10 @@ class graph {
         if (u != v) {
             for (let i = 0; i < this.edges.length; i++) {
                 if (this.edges[i].u == u && this.edges[i].v == v) {
-                    console.log("already added edge");
+                    warn("already added edge");
                     return;
                 } else if (this.edges[i].u == v && this.edges[i].v == u) {
-                    console.log("already added edge");
+                    warn("already added edge");
                     return;
                 }
             }
@@ -208,20 +228,23 @@ class graph {
     draw() {
         // edges need to be drawn first so that nodes are drawn on top of them
         for (let i = 0; i < this.edges.length; i++) {
-            this.edges[i].draw();
             if (this.selectedindex == i && this.selectedelement == 1) {
                 noFill(); stroke(100); strokeWeight(2);
-                ellipse((this.edges[i].u.x + this.edges[i].v.x) / 2, (this.edges[i].u.y + this.edges[i].v.y) / 2, this.nodes[0].r, this.nodes[0].r);
+                push();
+                translate((this.edges[i].u.x + this.edges[i].v.x) / 2, (this.edges[i].u.y + this.edges[i].v.y) / 2);
+                rotate(lineangle(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y));
+                ellipse(0, 0, ptopdist(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y) / 2 - this.nodes[0].r, this.nodes[0].r);
+                pop();
             }
+            this.edges[i].draw();
         }
         for (let i = 0; i < this.nodes.length; i++) {
-            this.nodes[i].draw();
             if (this.selectedindex == i && this.selectedelement == 0) {
                 noFill(); stroke(100); strokeWeight(2);
-                ellipse(this.nodes[i].x, this.nodes[i].y, this.nodes[i].r, this.nodes[i].r);
+                ellipse(this.nodes[i].x, this.nodes[i].y, this.nodes[i].r + 1, this.nodes[i].r + 1);
             }
+            this.nodes[i].draw();
         }
-        this.selectedhue = (this.selectedhue + 5) % 360;
     }
 
     clear() {
@@ -272,8 +295,17 @@ class graph {
             adjlist.push([]);
             for (let j = 0; j < this.edges.length; j++) {
                 const e = this.edges[j];
-                if (e.direction == 0 && e.u == u) {
-                    adjlist[i].push(this.nodes.indexOf(e.v));
+                switch (e.direction) {
+                    case 0:
+                        if (e.u == u) adjlist[i].push(this.nodes.indexOf(e.v));
+                        break;
+                    case 1:
+                        if (e.v == u) adjlist[i].push(this.nodes.indexOf(e.u));
+                        break;
+                    case 2:
+                        if (e.u == u) adjlist[i].push(this.nodes.indexOf(e.v));
+                        if (e.v == u) adjlist[i].push(this.nodes.indexOf(e.u));
+                        break;
                 }
             }
         }

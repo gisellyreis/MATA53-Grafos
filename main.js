@@ -1,10 +1,12 @@
-let ggraph = new graph();
 let canvas;
 let inputbox;
 let labelbuffer;
 let dropdownmenu;
 let runbutton;
 let clearbutton;
+let warning;
+let ggraph = new graph();
+
 function setup() {
     setcanvas();
     setsidebar();
@@ -16,6 +18,10 @@ function setup() {
     textStyle(BOLD);
     textFont("Courier New");
     textSize(20);
+}
+
+function warn(message) {
+    warning.innerHTML = message;
 }
 
 function draw() {
@@ -80,14 +86,16 @@ function setcanvas() {
     canvas.position(x, y);
 
     window.addEventListener("keydown", (event) => {
-        if (event.code == "Delete") {
-            ggraph.removeselected();
+        if (!ggraph.locked) {
+            if (event.code == "Delete") {
+                ggraph.removeselected();
+            }
         }
     });
 
     canvas.elt.addEventListener("dblclick", () => {
-        if (mouseX <= windowWidth * 0.17) return;
         if (!ggraph.locked) {
+            if (mouseX <= windowWidth * 0.17) return;
             if (ggraph.selectedelement == -1) {
                 ggraph.addnode(mouseX, mouseY, 20);
             }
@@ -95,16 +103,18 @@ function setcanvas() {
     });
 
     canvas.elt.addEventListener("click", () => {
-        if (mouseX <= windowWidth * 0.17) return;
-        ggraph.select(mouseX, mouseY);
-        if (ggraph.selectedelement != -1) {
-            inputbox.focus();
+        if (!ggraph.locked) {
+            if (mouseX <= windowWidth * 0.17) return;
+            ggraph.select(mouseX, mouseY);
+            if (ggraph.selectedelement != -1) {
+                inputbox.focus();
+            }
         }
     });
 
     canvas.elt.addEventListener("mousedown", () => {
-        if (mouseX <= windowWidth * 0.17) return;
         if (!ggraph.locked) {
+            if (mouseX <= windowWidth * 0.17) return;
             ggraph.select(mouseX, mouseY);
             if (ggraph.selectedelement == 1) {
                 if (keyIsDown(CONTROL)) {
@@ -115,22 +125,22 @@ function setcanvas() {
     });
 
     canvas.elt.addEventListener("mouseup", () => {
-        if (mouseX <= windowWidth * 0.17) return;
         if (!ggraph.locked) {
-            if (keyIsDown(SHIFT)) {
-                for (let i = ggraph.nodes.length - 1; i >= 0; i--) {
-                    if (ggraph.nodes[i].contains(mouseX, mouseY)) {
-                        ggraph.addegde(ggraph.nodes[ggraph.selectedindex], ggraph.nodes[i]);
-                        // console.log("added edge");
-                        break;
+            if (mouseX <= windowWidth * 0.17) return;
+            if (ggraph.selectedelement != -1) {
+                if (keyIsDown(SHIFT)) {
+                    for (let i = ggraph.nodes.length - 1; i >= 0; i--) {
+                        if (ggraph.nodes[i].contains(mouseX, mouseY)) {
+                            ggraph.addegde(ggraph.nodes[ggraph.selectedindex], ggraph.nodes[i]);
+                            break;
+                        }
                     }
-                }
-            } else if (keyIsDown(CONTROL)) {
-                for (let i = ggraph.nodes.length - 1; i >= 0; i--) {
-                    if (ggraph.nodes[i].contains(mouseX, mouseY)) {
-                        ggraph.adddirectedegde(ggraph.nodes[ggraph.selectedindex], ggraph.nodes[i]);
-                        // console.log("added edge");
-                        break;
+                } else if (keyIsDown(CONTROL)) {
+                    for (let i = ggraph.nodes.length - 1; i >= 0; i--) {
+                        if (ggraph.nodes[i].contains(mouseX, mouseY)) {
+                            ggraph.adddirectedegde(ggraph.nodes[ggraph.selectedindex], ggraph.nodes[i]);
+                            break;
+                        }
                     }
                 }
             }
@@ -138,8 +148,8 @@ function setcanvas() {
     });
 
     canvas.elt.addEventListener("mousemove", () => {
-        if (mouseX <= windowWidth * 0.17) return;
         if (!ggraph.locked) {
+            if (mouseX <= windowWidth * 0.17) return;
             if (mouseIsPressed) {
                 if (ggraph.selectedelement == 0) {
                     if (!keyIsDown(SHIFT) && !keyIsDown(CONTROL)) {
@@ -204,40 +214,74 @@ function setsidebar() {
     //algorithmselect
     const algorithmselect = document.createElement("select");
     sidebardiv.appendChild(algorithmselect);
-    algorithmselect.addEventListener("change", (e) => {
-        runbutton.addEventListener("click", (e) => {
-            switch (algorithmselect.value) {
-                case "topologicalsort":
-                    if (!isempty() && isdirected() && !hascycle()) {
-                        topologicalsort();
-                    }
-                    break;
-            }
-        });
-    });
     const placeholderoption = document.createElement("option");
     placeholderoption.value = "";
-    placeholderoption.innerHTML = "select algorithm";
-    placeholderoption.disabled = "";
-    placeholderoption.selected = "";
+    placeholderoption.innerHTML = "Select an algorithm";
+    placeholderoption.disabled = true;
+    placeholderoption.defaultSelected = true;
     algorithmselect.appendChild(placeholderoption);
     const topologicalsortoption = document.createElement("option");
-    topologicalsortoption.value = "topologicalsort";
-    topologicalsortoption.innerHTML = "topological sort";
     algorithmselect.appendChild(topologicalsortoption);
+    topologicalsortoption.value = "topologicalsort";
+    topologicalsortoption.innerHTML = "Topological sorting";
+    const johnsonsoption = document.createElement("option");
+    algorithmselect.appendChild(johnsonsoption);
+    johnsonsoption.value = "johnsons";
+    johnsonsoption.innerHTML = "Johnson's algorithm";
+    const bellmanfordoption = document.createElement("option");
+    algorithmselect.appendChild(bellmanfordoption);
+    bellmanfordoption.value = "bellmanford";
+    bellmanfordoption.innerHTML = "Bellman-Ford algorithm";
+    const boruvkaoption = document.createElement("option");
+    algorithmselect.appendChild(boruvkaoption);
+    boruvkaoption.value = "boruvka";
+    boruvkaoption.innerHTML = "Borůvka's algorithm";
 
     //runbutton
     runbutton = document.createElement("button");
     sidebardiv.appendChild(runbutton);
     runbutton.innerHTML = "run algorithm";
+    runbutton.addEventListener("click", async (e) => {
+        // console.log(algorithmselect.value);
+        ggraph.lock();
+        ggraph.unselect();
+        switch (algorithmselect.value) {
+            case "topologicalsort":
+                warn("");
+                await topologicalsort();
+                break;
+            case "johnsons":
+                warn("chame aqui a função pro johnson's");
+                break;
+            case "bellmanford":
+                warn("chame aqui a função pro bellman ford");
+                break;
+            case "boruvka":
+                warn("chame aqui a função pro boruvka");
+                break;
+            default:
+                warn("no algorithm selected");
+                break;
+        }
+        ggraph.unlock();
+    });
+
+    //warningbox
+    warning = document.createElement("p");
+    sidebardiv.appendChild(warning);
+    warning.style.color = "red";
+    warning.style.overflowY = "auto";
+    warning.style.flexGrow = "2";
+    warning.style.userSelect = "none";
+    warning.innerHTML = "";
 
     //clearbutton
     clearbutton = document.createElement("button");
     sidebardiv.appendChild(clearbutton);
     clearbutton.innerHTML = "clear all nodes";
-    clearbutton.style.position = "absolute";
-    clearbutton.style.bottom = "0px";
-    clearbutton.style.width = "100%";
+    // clearbutton.style.position = "absolute";
+    // clearbutton.style.bottom = "0px";
+    // clearbutton.style.width = "100%";
     clearbutton.addEventListener("click", (e) => {
         ggraph.clear();
     });
