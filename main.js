@@ -243,12 +243,13 @@ function setsidebar() {
     runbutton.innerHTML = "run algorithm";
     runbutton.addEventListener("click", async (e) => {
         // console.log(algorithmselect.value);
-        ggraph.lock();
-        ggraph.unselect();
         switch (algorithmselect.value) {
             case "topologicalsort":
                 warn("");
+                ggraph.lock();
+                ggraph.unselect();
                 await topologicalsort();
+                ggraph.unlock();
                 break;
             case "johnsons":
                 warn("chame aqui a função pro johnson's");
@@ -263,7 +264,6 @@ function setsidebar() {
                 warn("no algorithm selected");
                 break;
         }
-        ggraph.unlock();
     });
 
     //warningbox
