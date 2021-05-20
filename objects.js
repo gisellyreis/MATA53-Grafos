@@ -49,6 +49,10 @@ class node {
     setlabel(label) {
         this.label = label;
     }
+
+    hash() {
+        return this.x * 1_000_000 + this.y;
+    }
 }
 
 class edge {
@@ -129,7 +133,8 @@ class graph {
         for (let i = 0; i < this.edges.length; i++) {
             if (
                 this.nodes.indexOf(this.edges[i].u) == u && this.nodes.indexOf(this.edges[i].v) == v ||
-                this.nodes.indexOf(this.edges[i].u) == v && this.nodes.indexOf(this.edges[i].v) == u
+                this.nodes.indexOf(this.edges[i].u) == v && this.nodes.indexOf(this.edges[i].v) == u ||
+                this.edges[i].u == u && this.edges[i].v == v || this.edges[i].v == u && this.edges[i].u == v
             ) {
                 return i;
             }
@@ -331,7 +336,7 @@ class algorithm {
         this.steps.push(" ".repeat(indent + 3) + step);
     }
 
-    print(at_step = -1) {
+    async print(at_step = -1) {
         let alg = "";
         for (var i = 0; i < this.steps.length; i++) {
             if (i == at_step) {
@@ -341,8 +346,9 @@ class algorithm {
             }
             else alg += this.steps[i] + '\n';
         }
-        console.log(alg);
+        //console.log(alg);
         this.write(`<pre><code>` + alg + `</code></pre>`);
+        await sleep(MS_PER_STEP / multiplier);
     }
 
     write(code) {

@@ -7,7 +7,8 @@ let clearbutton;
 let warning;
 let algoBox;
 const ggraph = new graph();
-
+const MS_PER_STEP = 500;
+var multiplier = 1;
 function setup() {
     setcanvas();
     setsidebar();
