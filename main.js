@@ -95,6 +95,20 @@ function setcanvas() {
         }
     });
 
+    // Testes Giselly - Shorterst path 
+
+    window.addEventListener("keypress", (e) => {
+        if (e.key == "t") {
+            //console.log(ggraph.nodes);
+            //console.log(ggraph.edges);
+            //console.log(ggraph.selectedelement);
+            //console.log(ggraph.selectedindex);
+            //ggraph.get_adjacency_matrix();
+            ggraph.nodes[ggraph.selectedindex].hue = 0;
+            Dijkstra(ggraph.selectedindex);
+        }
+    });
+
     canvas.elt.addEventListener("dblclick", () => {
         if (!ggraph.locked) {
             if (mouseX <= windowWidth * 0.17) return;
@@ -291,13 +305,13 @@ function setsidebar() {
     // clearbutton.style.bottom = "0px";
     // clearbutton.style.width = "100%";
     clearbutton.addEventListener("click", (e) => {
-        if(!ggraph.locked){
+        if (!ggraph.locked) {
             ggraph.clear();
         }
     });
 }
 
-function setAlgorithmBox(){
+function setAlgorithmBox() {
     algoBox = document.createElement('div');
     algoBox.style.position = "absolute";
     algoBox.style.bottom = "15px";
