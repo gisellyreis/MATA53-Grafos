@@ -5,11 +5,13 @@ let dropdownmenu;
 let runbutton;
 let clearbutton;
 let warning;
-let ggraph = new graph();
+let algoBox;
+const ggraph = new graph();
 
 function setup() {
     setcanvas();
     setsidebar();
+    setAlgorithmBox();
 
     ellipseMode(RADIUS);
     frameRate(30);
@@ -259,6 +261,12 @@ function setsidebar() {
                 break;
             case "boruvka":
                 warn("chame aqui a função pro boruvka");
+                ggraph.lock();
+                ggraph.unselect();
+                algoBox.style.visibility = "visible";
+                await boruvka();
+                algoBox.style.visibility = "hidden";
+                ggraph.unlock();
                 break;
             default:
                 warn("no algorithm selected");
@@ -283,6 +291,22 @@ function setsidebar() {
     // clearbutton.style.bottom = "0px";
     // clearbutton.style.width = "100%";
     clearbutton.addEventListener("click", (e) => {
-        ggraph.clear();
+        if(!ggraph.locked){
+            ggraph.clear();
+        }
     });
+}
+
+function setAlgorithmBox(){
+    algoBox = document.createElement('div');
+    algoBox.style.position = "absolute";
+    algoBox.style.bottom = "15px";
+    algoBox.style.right = "15px";
+    algoBox.style.padding = "10px 15px 10px 15px";
+    algoBox.style.backgroundColor = "#2f2f2f";
+    algoBox.style.color = "white";
+    algoBox.style.opacity = "0.8";
+    algoBox.style.border = "3px solid white";
+    algoBox.style.visibility = "hidden";
+    document.body.appendChild(algoBox);
 }

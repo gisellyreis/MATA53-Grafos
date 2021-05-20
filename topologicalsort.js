@@ -1,17 +1,3 @@
-function isempty() {
-    return ggraph.nodes.length == 0;
-}
-
-function isdirected() {
-    for (let i = 0; i < ggraph.edges.length; i++) {
-        if (ggraph.edges[i].direction == 2) {
-            warn("not a directed graph");
-            return false;
-        }
-    }
-    return true;
-}
-
 function hascycle() {
     let adjmatrix = [];
     for (let i = 0; i < ggraph.nodes.length; i++) {

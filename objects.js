@@ -312,3 +312,40 @@ class graph {
         return adjlist;
     }
 }
+
+class algorithm{
+    constructor(){
+        this.steps = [];
+    }
+    
+    get_indent(indent){
+        let res = "";
+        while(indent > 0){
+            res += "&nbsp ";
+            indent--;
+        }
+        return res;
+    }
+
+    add_step(step, indent=0){
+        this.steps.push(" ".repeat(indent + 3) + step);
+    }
+
+    print(at_step=-1){
+        let alg = "";
+        for(var i=0;i<this.steps.length;i++){
+            if(i == at_step){
+                this.steps[i] = "->" + this.steps[i].substr(2);
+                alg += this.steps[i] + '\n';
+                this.steps[i] = "  " + this.steps[i].substr(2);
+            }
+            else alg += this.steps[i] + '\n';
+        }
+        console.log(alg);
+        this.write(`<pre><code>` + alg + `</code></pre>`);
+    }
+
+    write(code){
+        algoBox.innerHTML = code;
+    }
+}
