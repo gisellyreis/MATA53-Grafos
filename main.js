@@ -227,7 +227,6 @@ function setsidebar() {
             ggraph.edges[ggraph.selectedindex].setlabel(inputbox.value);
         }
     });
-
     //algorithmselect
     const algorithmselect = document.createElement("select");
     sidebardiv.appendChild(algorithmselect);
@@ -253,6 +252,24 @@ function setsidebar() {
     algorithmselect.appendChild(boruvkaoption);
     boruvkaoption.value = "boruvka";
     boruvkaoption.innerHTML = "Borůvka's algorithm";
+    
+    //speed of algorithm
+    var label = document.createElement("label");
+    label.innerHTML = "Velocidade de reprodução:"
+    label.htmlFor = "speedmult";
+    label.style.color = "white";
+    sidebardiv.appendChild(label);
+    const speedmult = document.createElement("select");
+    sidebardiv.appendChild(speedmult);
+    speedmult.id = speedmult.name = "speedmult";
+    var values = ["0.25", "0.5", "0.75", "Normal", "1.25", "1.5", "1.75", "2"];
+    for(const val of values){
+        var opt = document.createElement("option");
+        opt.value = val;
+        opt.text = val;
+        if(val == "Normal") opt.defaultSelected = true;
+        speedmult.appendChild(opt);
+    }
 
     //runbutton
     runbutton = document.createElement("button");
@@ -260,6 +277,7 @@ function setsidebar() {
     runbutton.innerHTML = "run algorithm";
     runbutton.addEventListener("click", async (e) => {
         // console.log(algorithmselect.value);
+        multiplier = (speedmult.value == "Normal" ? 1 : parseFloat(speedmult.value));
         switch (algorithmselect.value) {
             case "topologicalsort":
                 warn("");
@@ -275,7 +293,7 @@ function setsidebar() {
                 warn("chame aqui a função pro bellman ford");
                 break;
             case "boruvka":
-                warn("chame aqui a função pro boruvka");
+                warn("");
                 ggraph.lock();
                 ggraph.unselect();
                 algoBox.style.visibility = "visible";
@@ -320,7 +338,7 @@ function setAlgorithmBox() {
     algoBox.style.padding = "10px 15px 10px 15px";
     algoBox.style.backgroundColor = "#2f2f2f";
     algoBox.style.color = "white";
-    algoBox.style.opacity = "0.8";
+    algoBox.style.opacity = "0.65";
     algoBox.style.border = "3px solid white";
     algoBox.style.visibility = "hidden";
     document.body.appendChild(algoBox);

@@ -27,10 +27,6 @@ async function boruvka(){
         warn("Todas as arestas devem conter apenas números.")
         return;
     }
-    if(!is_graph_connected()){
-        warn("O grafo precisa ser conexo.");
-        return;
-    }
     // all requirements are met, start the algorithm
     var algo = new algorithm();
     // construct my pseudocode line by line:
@@ -58,7 +54,7 @@ async function boruvka(){
     let dfs = async (u, idx, col) => {
         ggraph.nodes[u].label = idx;
         ggraph.nodes[u].hue = col;
-        await sleep(150);
+        await sleep(150/multiplier);
         vis[u] = idx;
         for(var i=0;i<adj[u].length;i++){
             if(!vis[adj[u][i]]){
@@ -132,7 +128,9 @@ async function boruvka(){
             ggraph.nodes[i].hue = 120;
         }
     }
-
-    await sleep(25000);
+    await sleep(15000/multiplier);
+    for(var i=0;i<ggraph.edges.length;i++){
+        ggraph.edges[i].hue = 0;
+    }
     return;
 }
