@@ -49,10 +49,6 @@ class node {
     setlabel(label) {
         this.label = label;
     }
-
-    hash() {
-        return this.x * 1_000_000 + this.y;
-    }
 }
 
 class edge {

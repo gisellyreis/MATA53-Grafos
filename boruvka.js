@@ -52,58 +52,64 @@ async function boruvka(){
     algo.add_step("para cada componente em que a aresta de peso mínimo não é oo", 3);
     algo.add_step("Adicione a aresta com peso mínimo para F", 6);
     algo.add_step("concluído <- falso", 6);
-    P = {}; SZ = {}; //parent, size => dsu
-    let root = (u) => {return P[u.hash()] = (u == P[u.hash()] ? u : root(P[u.hash()]));}
-    let swap = (x) => {return x;}
-    let union = (u, v) => { // edge has been selected as part of mst
-        console.log(u, v);
-        console.log(P);
-        ggraph.edges[ggraph.get_edge_index(u, v)].hue = 275;
-        u = root(u); v = root(v);
-        if(u != v){
-            if(SZ[u.hash()] < SZ[v.hash()]){
-                u = swap(v, v=u);
+    var adj = [];
+    for(var i=0;i<ggraph.nodes.length;i++) adj[i] = [];
+    var vis = {};
+    let dfs = async (u, idx, col) => {
+        ggraph.nodes[u].label = idx;
+        ggraph.nodes[u].hue = col;
+        await sleep(150);
+        vis[u] = idx;
+        for(var i=0;i<adj[u].length;i++){
+            if(!vis[adj[u][i]]){
+                await dfs(adj[u][i], idx, col);
             }
-            SZ[u.hash()] += SZ[v.hash()];
-            P[v.hash()] = P[u.hash()];
         }
-        console.log(P);
     };
     E = {}; // cheapest edge for every component
-    for(var i = 0;i < ggraph.nodes.length; i++){
-        P[ggraph.nodes[i].hash()] = ggraph.nodes[i]; // cada vértice tem seu próprio componente.
-        SZ[ggraph.nodes[i].hash()] = 1;
-    }
-    let reset_cheapest_edges = () => {
-        for(var i=0; i < ggraph.nodes.length;i++){
-           E[root(ggraph.nodes[i]).hash()] = [Infinity, -1];
+    let reset_cheapest_edges = (n) => {
+        for(var i=1; i < n;i++){
+           E[i] = [Infinity, -1];
         }
     };
     await algo.print(3);
     let completed = false;
     await algo.print(4);
     while(!completed){ await algo.print(5);
-        await algo.print(6); // already computed via dsu, no need to recompute
-        reset_cheapest_edges(); await algo.print(7);
-        for(var i=0;i<ggraph.edges.length;i++){ await algo.print(8);
+        var comp = 1;
+        for(var i=0;i<ggraph.nodes.length;i++) vis[i] = 0;
+        algo.print(6);
+        for(var i=0;i<ggraph.nodes.length;i++){
+            if(!vis[i]){
+                await dfs(i, comp++, i * (360 / ggraph.nodes.length));
+            }
+        }
+        await algo.print(6);
+        reset_cheapest_edges(comp); await algo.print(7);
+        for(var i=0;i<ggraph.edges.length;i++){ await algo.print(8); 
+            var old_hue = ggraph.edges[i].hue;
+            ggraph.edges[i].hue = 35;
             await algo.print(9);
             var u = ggraph.edges[i].u;
             var v = ggraph.edges[i].v;
+            var iu = ggraph.nodes.indexOf(u);
+            var iv = ggraph.nodes.indexOf(v);
             var c = parseInt(ggraph.edges[i].label);
-            console.log(u, v, root(u), root(v));
-            console.log(root(u) != root(v));
-            if(root(u) != root(v)){
+            if(vis[iu] != vis[iv]){
+                iu = vis[iu]; 
+                iv = vis[iv];
                 await algo.print(10);
-                if(c < E[root(u).hash()][0] || (c == E[root(u).hash()][0] && i < E[root(u).hash()][1])){
+                if(c < E[iu][0] || (c == E[iu][0] && i < E[iu][1])){
                     await algo.print(11);
-                    E[root(u).hash()] = [c, i];
+                    E[iu] = [c, i];
                 }
                 await algo.print(12);
-                if(c < E[root(v).hash()][0] || (c == E[root(v).hash()][0] && i < E[root(v).hash()][1])){
+                if(c < E[iv][0] || (c == E[iv][0] && i < E[iv][1])){
                     await algo.print(13);
-                    E[root(v).hash()] = [c, i];
+                    E[iv] = [c, i];
                 }
             }
+            ggraph.edges[i].hue = old_hue;
         }
         completed = true;
         await algo.print(14);
@@ -112,13 +118,19 @@ async function boruvka(){
             k = comps[i];
             if(E[k][0] != Infinity){
                 await algo.print(15);
-                union(ggraph.edges[E[k][1]].u, ggraph.edges[E[k][1]].v);
+                var u = ggraph.nodes.indexOf(ggraph.edges[E[k][1]].u), v = ggraph.nodes.indexOf(ggraph.edges[E[k][1]].v);
+                adj[u].push(v); adj[v].push(u); ggraph.edges[E[k][1]].hue = 275;
                 await algo.print(16);
                 completed = false;
                 await algo.print(17);
             }
         }
         E = {}; // clear edges.
+        vis = {}; // clear components
+        for(var i=0;i<ggraph.nodes.length;i++){
+            ggraph.nodes[i].label = "";
+            ggraph.nodes[i].hue = 120;
+        }
     }
 
     await sleep(25000);
