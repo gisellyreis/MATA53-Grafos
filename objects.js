@@ -59,7 +59,7 @@ class edge {
         this.v = v;
         this.direction = 2; // |  0: u -> v  |  1: u <- v  |  2: u - v  |
 
-        this.weight = 1;
+        this.weight = this.label;
 
         this.hue = 0;
         this.saturation = 95;

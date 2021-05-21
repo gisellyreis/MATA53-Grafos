@@ -102,8 +102,9 @@ function setcanvas() {
             //console.log(ggraph.selectedelement);
             //console.log(ggraph.selectedindex);
             //ggraph.get_adjacency_matrix();
-            ggraph.nodes[ggraph.selectedindex].hue = 0;
-            Dijkstra(ggraph.selectedindex);
+            //ggraph.nodes[ggraph.selectedindex].hue = 0;
+            //Dijkstra(ggraph.selectedindex);
+            Bellman();
         }
     })
 

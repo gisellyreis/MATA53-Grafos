@@ -1,3 +1,4 @@
+// retorna todos os vizinhos do nó u
 function neighbor(u) {
     var adjmatrix = ggraph.get_adjacency_matrix();
 
@@ -11,58 +12,95 @@ function neighbor(u) {
 }
 
 async function Dijkstra(target) {
-    var unvisited = [];
-    var prev = [];
+    // d = peso
+    // p = prev
+    // n = quantidade de vértices do grafo
+    // u = vetor de visitados
 
-    for (let i = 0; i < ggraph.nodes.length; i++) {
-        ggraph.nodes[i].weight = 1000000;
-        prev[i] = null;
-        unvisited.push(i);
+    var visitados = [];
+    var predecessor = [];
+
+    for (let i = 0; i< ggraph.nodes.length; i++) {
+        ggraph.nodes[i].weight = Infinity;
+        predecessor[i] = -1;
+        visitados[i] = false;
     }
 
-    // node inicial = peso 0
     ggraph.nodes[0].weight = 0;
 
-    var u = ggraph.nodes[unvisited[0]];
-    var idx;
-    var weight = 1000000;
 
-    while (unvisited.length > 0) {
+    for(let i=0; i < ggraph.nodes.length; i++) {
+        let v = -1;
+        for(let j = 0; j < ggraph.nodes.length; j++) {
+            if(!visitados[j] && (v == -1 || ggraph.nodes[j].weight < ggraph.nodes[v].weight)) {
+                v = j;
+            }
 
-        // u = node com o menor peso
-        for (let i = 0; i < unvisited.length; i++) {
-            if(ggraph.nodes[unvisited[i]].weight < weight) {
-                weight = ggraph.nodes[unvisited[i]].weight;
-                u = ggraph.nodes[unvisited[i]];
-                idx = unvisited[i];
+        }
+
+        if(ggraph.nodes[v].weight == Infinity) {
+            break;
+        }
+
+        visitados[v] = true;
+
+        var neighbors = neighbor(v);
+        for(let k = 0; k < neighbors.length; k++) {
+            if((ggraph.nodes[v].weight + 1) < ggraph.nodes[neighbors[k]].weight) {
+                ggraph.nodes[neighbors[k]].weight = ggraph.nodes[v].weight + 1;
+                predecessor[neighbors[k]] = v;
             }
         }
-
-        // remove u de unvisited pelo indice
-        unvisited.splice(idx,1);
-        console.log(idx, target, u);
-
-
-        if (idx == target) {
-            return
-        }
-
-        var neighbors = neighbor(idx);
-        console.log(neighbors);
-
-        for (let v = 0; v < neighbors.length; v++) {
-            if(unvisited.includes(neighbors[v])) {
-                let aux = u.weight + 1;
-                if(aux < ggraph.nodes[neighbors[v]].weight) {
-                    console.log(ggraph.nodes[neighbors[v]]);
-                    ggraph.nodes[neighbors[v]].weight = aux;
-                    prev[v] = u;
-                }
-            }
-        }
-
     }
-
-    console.log(prev); 
+    console.log(predecessor);
     return
 }
+
+
+async function Bellman() {
+    // m = ?
+    // e[j].a = u ; e[j].b = v
+    // d[e[j].a] = peso do vértice u em e
+
+    var visitados = [];
+    var predecessor = [];
+
+    for (let i = 0; i< ggraph.nodes.length; i++) {
+        ggraph.nodes[i].weight = Infinity;
+        predecessor[i] = -1;
+        visitados[i] = false;
+    }
+
+    ggraph.nodes[0].weight = 0;
+
+    for(;;) {
+        var any = false;
+
+        for(let j = 0; j < ggraph.edges.length; j++) {
+
+            if(ggraph.edges[j].weight == 0 ) {ggraph.edges[j].weight = 1;}
+            else {ggraph.edges[j].weight = parseInt(ggraph.edges[j].weight, 10);}
+
+            if(ggraph.edges[j].u.weight < Infinity) {
+                if(ggraph.edges[j].v.weight > (ggraph.edges[j].u.weight + ggraph.edges[j].weight)) {
+                    ggraph.edges[j].v.weight = ggraph.edges[j].u.weight + ggraph.edges[j].weight;
+                    predecessor[ggraph.nodes.indexOf(ggraph.edges[j].v)] = ggraph.nodes.indexOf(ggraph.edges[j].u);
+                    
+                    console.log(ggraph.edges[j].u);
+                    console.log(ggraph.edges[j].v);
+                    
+                    any = true;
+                }
+            }
+            //console.log(ggraph.edges[j].u);
+        }
+        if(!any) break;
+    }
+
+
+    
+    console.log(predecessor);
+}
+
+// achar o indice do nó
+
