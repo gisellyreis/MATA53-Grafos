@@ -78,8 +78,14 @@ async function Bellman() {
 
         for(let j = 0; j < ggraph.edges.length; j++) {
 
-            if(ggraph.edges[j].weight == 0 ) {ggraph.edges[j].weight = 1;}
-            else {ggraph.edges[j].weight = parseInt(ggraph.edges[j].weight, 10);}
+            if(ggraph.edges[j].label == "" ) {
+                console.log('sem peso');
+            }
+            else {
+                console.log('com peso. peso = ' + ggraph.edges[j].label);
+                ggraph.edges[j].weight = parseInt(ggraph.edges[j].label, 10);
+            } 
+            
 
             if(ggraph.edges[j].u.weight < Infinity) {
                 if(ggraph.edges[j].v.weight > (ggraph.edges[j].u.weight + ggraph.edges[j].weight)) {

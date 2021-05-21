@@ -51,6 +51,10 @@ class node {
     setlabel(label) {
         this.label = label;
     }
+
+    hash() {
+        return this.x * 1_000_000 + this.y;
+    }
 }
 
 class edge {
@@ -59,7 +63,7 @@ class edge {
         this.v = v;
         this.direction = 2; // |  0: u -> v  |  1: u <- v  |  2: u - v  |
 
-        this.weight = this.label;
+        this.weight = 1;
 
         this.hue = 0;
         this.saturation = 95;
@@ -118,7 +122,6 @@ class graph {
         this.edges = [];
         this.selectedelement = -1; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
         this.selectedindex = -1; // index of the selected element in the according type's array
-        //this.selectedhue = 0;
         this.locked = false;
     }
 
@@ -134,7 +137,8 @@ class graph {
         for (let i = 0; i < this.edges.length; i++) {
             if (
                 this.nodes.indexOf(this.edges[i].u) == u && this.nodes.indexOf(this.edges[i].v) == v ||
-                this.nodes.indexOf(this.edges[i].u) == v && this.nodes.indexOf(this.edges[i].v) == u
+                this.nodes.indexOf(this.edges[i].u) == v && this.nodes.indexOf(this.edges[i].v) == u ||
+                this.edges[i].u == u && this.edges[i].v == v || this.edges[i].v == u && this.edges[i].u == v
             ) {
                 return i;
             }
@@ -315,5 +319,43 @@ class graph {
             }
         }
         return adjlist;
+    }
+}
+
+class algorithm {
+    constructor() {
+        this.steps = [];
+    }
+
+    get_indent(indent) {
+        let res = "";
+        while (indent > 0) {
+            res += "&nbsp ";
+            indent--;
+        }
+        return res;
+    }
+
+    add_step(step, indent = 0) {
+        this.steps.push(" ".repeat(indent + 3) + step);
+    }
+
+    async print(at_step = -1) {
+        let alg = "";
+        for (var i = 0; i < this.steps.length; i++) {
+            if (i == at_step) {
+                this.steps[i] = "->" + this.steps[i].substr(2);
+                alg += this.steps[i] + '\n';
+                this.steps[i] = "  " + this.steps[i].substr(2);
+            }
+            else alg += this.steps[i] + '\n';
+        }
+        //console.log(alg);
+        this.write(`<pre><code>` + alg + `</code></pre>`);
+        await sleep(MS_PER_STEP / multiplier);
+    }
+
+    write(code) {
+        algoBox.innerHTML = code;
     }
 }
