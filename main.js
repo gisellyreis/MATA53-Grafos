@@ -105,8 +105,9 @@ function setcanvas() {
             //console.log(ggraph.selectedelement);
             //console.log(ggraph.selectedindex);
             //ggraph.get_adjacency_matrix();
-            ggraph.nodes[ggraph.selectedindex].hue = 0;
-            Dijkstra(ggraph.selectedindex);
+            // ggraph.nodes[ggraph.selectedindex].hue = 0;
+            // Dijkstra(ggraph.selectedindex);
+            Bellman();
         }
     });
 
@@ -252,10 +253,10 @@ function setsidebar() {
     algorithmselect.appendChild(boruvkaoption);
     boruvkaoption.value = "boruvka";
     boruvkaoption.innerHTML = "Borůvka's algorithm";
-    
+
     //speed of algorithm
     var label = document.createElement("label");
-    label.innerHTML = "Velocidade de reprodução:"
+    label.innerHTML = "Velocidade de reprodução:";
     label.htmlFor = "speedmult";
     label.style.color = "white";
     sidebardiv.appendChild(label);
@@ -263,11 +264,11 @@ function setsidebar() {
     sidebardiv.appendChild(speedmult);
     speedmult.id = speedmult.name = "speedmult";
     var values = ["0.25", "0.5", "0.75", "Normal", "1.25", "1.5", "1.75", "2"];
-    for(const val of values){
+    for (const val of values) {
         var opt = document.createElement("option");
         opt.value = val;
         opt.text = val;
-        if(val == "Normal") opt.defaultSelected = true;
+        if (val == "Normal") opt.defaultSelected = true;
         speedmult.appendChild(opt);
     }
 

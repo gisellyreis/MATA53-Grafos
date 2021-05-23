@@ -16,6 +16,8 @@ class node {
         this.y = y;
         this.r = r;
 
+        this.weight = 0;
+
         this.hue = 120;
         this.saturation = 70;
         this.lightness = 60;
@@ -56,6 +58,8 @@ class edge {
         this.u = u;
         this.v = v;
         this.direction = 2; // |  0: u -> v  |  1: u <- v  |  2: u - v  |
+
+        this.weight = 1;
 
         this.hue = 0;
         this.saturation = 95;
