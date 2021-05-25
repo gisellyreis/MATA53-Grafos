@@ -93,21 +93,6 @@ function setcanvas() {
         }
     });
 
-    // Testes Giselly - Shorterst path 
-
-    window.addEventListener("keypress", (e) => {
-        if(e.key == "t") {
-            //console.log(ggraph.nodes);
-            //console.log(ggraph.edges);
-            //console.log(ggraph.selectedelement);
-            //console.log(ggraph.selectedindex);
-            //ggraph.get_adjacency_matrix();
-            //ggraph.nodes[ggraph.selectedindex].hue = 0;
-            //Dijkstra(ggraph.selectedindex);
-            Bellman();
-        }
-    })
-
     canvas.elt.addEventListener("dblclick", () => {
         if (!ggraph.locked) {
             if (mouseX <= windowWidth * 0.17) return;
@@ -267,7 +252,14 @@ function setsidebar() {
                 ggraph.unlock();
                 break;
             case "johnsons":
-                warn("chame aqui a função pro johnson's");
+                warn("");
+                var source = ggraph.selectedindex;
+                var target;
+                setTimeout(async function(){
+                    target = ggraph.selectedindex;
+                    console.log(source, target);
+                    await Johnsons(source, target);
+                }, 5000);
                 break;
             case "bellmanford":
                 warn("chame aqui a função pro bellman ford");
