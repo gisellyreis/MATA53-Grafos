@@ -15,7 +15,7 @@ function neighbor(u) {
 async function Johnsons(source, target) {
     console.log(source, target);
 
-    Bellman(source, target);
+    Dijkstra(source, target);
     //Dijkstra(source, target);
 }
 
@@ -55,13 +55,19 @@ async function Dijkstra(source, target) {
         visitados[v] = true;
 
         var neighbors = neighbor(v);
+        var edg;
         for(let k = 0; k < neighbors.length; k++) {
+            edg = ggraph.get_edge_index(v, neighbors[k]);
+            console.log(ggraph.edges[edg]);
+            break;
             if((ggraph.nodes[v].weight + 1) < ggraph.nodes[neighbors[k]].weight) {
                 ggraph.nodes[neighbors[k]].weight = ggraph.nodes[v].weight + 1;
                 predecessor[neighbors[k]] = v;
             }
         }
     }
+
+    return
     //console.log(predecessor);
 
     // Usar await then 
@@ -76,10 +82,12 @@ async function Dijkstra(source, target) {
     path.unshift(source);
     console.log(path);
 
-    for(let i = 0; i < path.length; i++) {
-        ggraph.nodes[path[i]].hue = 360;
+    //var edge;
+    for(let i = 1; i < path.length; i++) {
+        ggraph.nodes[path[i]].hue = 120;
+        edge = ggraph.get_edge_index(path[i-1], path[i]);
+        ggraph.edges[edge].hue = 120;
     }
-
     return
 }
 
