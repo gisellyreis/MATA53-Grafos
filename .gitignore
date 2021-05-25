@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # each readme is different so...
-README.*
+README.md
