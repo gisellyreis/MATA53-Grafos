@@ -1,1 +1,2 @@
-# topological-sorting-visualizer
+# boruvka-visualizer
+https://viniciusth.github.io/boruvka-visualizer/
