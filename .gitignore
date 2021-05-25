@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# each readme is different so...
+# each readme is different so ignore them all when commiting
+.README.md
 README.md
