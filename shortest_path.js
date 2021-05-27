@@ -15,8 +15,20 @@ function neighbor(u) {
 async function Johnsons(source, target) {
     console.log(source, target);
 
-    Bellman(source, target);
-    //Dijkstra(source, target);
+    if(isdirected()) {
+        console.log('Grafo direcionado');
+        Bellman(source, target);
+    } else if(isundirected())  {
+        console.log('Grafo não direcionado');
+        Dijkstra(source, target);
+    } else {
+        console.log('Não sabe');
+    }
+
+    //console.log(ggraph.edges);
+
+    //Bellman(source, target);
+
 }
 
 async function Dijkstra(source, target) {
@@ -55,13 +67,28 @@ async function Dijkstra(source, target) {
         visitados[v] = true;
 
         var neighbors = neighbor(v);
+        var edg;
         for(let k = 0; k < neighbors.length; k++) {
-            if((ggraph.nodes[v].weight + 1) < ggraph.nodes[neighbors[k]].weight) {
-                ggraph.nodes[neighbors[k]].weight = ggraph.nodes[v].weight + 1;
+            edg = ggraph.get_edge_index(v, neighbors[k]);
+            if((ggraph.nodes[v].weight + ggraph.edges[edg].weight) < ggraph.nodes[neighbors[k]].weight) {
+                ggraph.nodes[neighbors[k]].weight = ggraph.nodes[v].weight +  ggraph.edges[edg].weight;
                 predecessor[neighbors[k]] = v;
+
+                // Colore os vértices sendo comparados
+               await new Promise(p => setTimeout(p, 1000));
+               ggraph.nodes[v].hue = 320;
+               ggraph.nodes[neighbors[k]].hue = 320;
+               ggraph.edges[edg].hue = 320;
             }
+
+            await new Promise(p => setTimeout(p, 1000));
+            ggraph.nodes[v].hue = 120;
+            ggraph.nodes[neighbors[k]].hue = 120;
+            ggraph.edges[edg].hue = 0;
+            //console.log(ggraph.edges[edg]);
         }
     }
+
     //console.log(predecessor);
 
     // Usar await then 
@@ -76,10 +103,12 @@ async function Dijkstra(source, target) {
     path.unshift(source);
     console.log(path);
 
-    for(let i = 0; i < path.length; i++) {
-        ggraph.nodes[path[i]].hue = 360;
+    //var edge;
+    for(let i = 1; i < path.length; i++) {
+        ggraph.nodes[path[i]].hue = 120;
+        edge = ggraph.get_edge_index(path[i-1], path[i]);
+        ggraph.edges[edge].hue = 120;
     }
-
     return
 }
 
@@ -145,6 +174,7 @@ async function Bellman(source, target) {
             } 
 
             if(ggraph.edges[j].u.weight < Infinity) {
+            
                 if(ggraph.edges[j].v.weight > (ggraph.edges[j].u.weight + ggraph.edges[j].weight)) {
                     ggraph.edges[j].v.weight = ggraph.edges[j].u.weight + ggraph.edges[j].weight;
                     predecessor[ggraph.nodes.indexOf(ggraph.edges[j].v)] = ggraph.nodes.indexOf(ggraph.edges[j].u);
@@ -177,6 +207,9 @@ async function Bellman(source, target) {
 
     console.log(ggraph.edges);
     console.log(predecessor);
+
+    Dijkstra(source, target);
+    return 
     var path = [];
     
     for(let v = target; v != source; v = predecessor[v]) {
