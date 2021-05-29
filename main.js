@@ -274,6 +274,7 @@ function setsidebar() {
                 case "johnsons":
                     ggraph.lock();
                     ggraph.allow_select = true;
+                    algoBox.style.visibility = "visible";
 
                     ggraph.unselect();
                     warn("primeiro escolha o nó de partida");
@@ -291,6 +292,7 @@ function setsidebar() {
 
                     await Johnsons(source, target);
 
+                    algoBox.style.visibility = "hidden";
                     ggraph.allow_select = false;
                     ggraph.unlock();
                     break;
