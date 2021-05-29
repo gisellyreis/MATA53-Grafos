@@ -282,6 +282,7 @@ function setsidebar() {
                 while (ggraph.selectedelement != 0 || source == ggraph.selectedindex) await sleep(50);
                 let target = ggraph.selectedindex;
                 console.log(source, target);
+                algoBox.style.visibility = "visible";
                 await Johnsons(source, target);
                 ggraph.allow_select = false;
                 ggraph.unlock();
