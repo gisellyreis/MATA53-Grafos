@@ -283,6 +283,7 @@ function setsidebar() {
                 let target = ggraph.selectedindex;
                 console.log(source, target);
                 await Johnsons(source, target);
+                ggraph.allow_select = false;
                 ggraph.unlock();
                 break;
             case "bellmanford":
