@@ -115,13 +115,43 @@ class edge {
 }
 
 class graph {
-    constructor() {
-        this.nodes = [];
-        this.edges = [];
-        this.selectedelement = -1; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
-        this.selectedindex = -1; // index of the selected element in the according type's array
-        this.locked = false;
-        this.allow_select = false;
+    constructor(oldgraph = null) {
+        if (oldgraph == null) {
+            this.nodes = [];
+            this.edges = [];
+            this.selectedelement = -1; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
+            this.selectedindex = -1; // index of the selected element in the according type's array
+            this.locked = false;
+            this.allow_select = false;
+        } else {
+            this.nodes = [];
+            this.edges = [];
+            this.selectedelement = oldgraph.selectedelement; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
+            this.selectedindex = oldgraph.selectedindex; // index of the selected element in the according type's array
+            this.locked = oldgraph.locked;
+            this.allow_select = oldgraph.allow_select;
+            for (let i = 0; i < oldgraph.nodes.length; i++) {
+                let u = oldgraph.nodes[i];
+                let n = new node(u.x, u.y, u.r);
+                n.hue = u.hue;
+                n.saturation = u.saturation;
+                n.lightness = u.lightness;
+                n.label = u.label;
+                this.nodes.push(n);
+            }
+            for (let i = 0; i < oldgraph.edges.length; i++) {
+                let e = oldgraph.edges[i];
+                let n = new edge(this.nodes[e.uidx], this.nodes[e.vidx]);
+                n.direction = e.direction;
+                n.uidx = e.uidx;
+                n.vidx = e.vidx;
+                n.hue = e.hue;
+                n.saturation = e.saturation;
+                n.lightness = e.lightness;
+                n.label = e.label;
+                this.edges.push(n);
+            }
+        }
     }
 
     lock() {
@@ -351,7 +381,7 @@ class algorithm {
         }
         //console.log(alg);
         this.write(`<pre><code>` + alg + `</code></pre>`);
-        if(!wait_time) await sleep(MS_PER_STEP / multiplier);
+        if (!wait_time) await sleep(MS_PER_STEP / multiplier);
         else await sleep(wait_time / multiplier);
     }
 

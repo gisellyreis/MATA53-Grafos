@@ -201,7 +201,7 @@ async function topologicalsort() {
         visited[node] = false;
         await algo.print(17);
         order.unshift(node);
-        reorder();
+        await reorder();
     }
 
     function get_unmarked() {
@@ -260,15 +260,26 @@ async function topologicalsort() {
         await algo.print(6);
         await topologicalsortdfs(unmarked);
         if (undirected.found) {
+            ggraph.unselect();
+            for (let i = 0; i < ggraph.nodes.length; i++) {
+                ggraph.nodes[i].hue = 120;
+            }
+            ggraph.edges[ggraph.get_edge_index(undirected.u, undirected.v)].hue = 240;
             message = "graph contains an undirected edge: </br> ";
             message += `${ggraph.edges[ggraph.get_edge_index(undirected.u, undirected.v)].label}`;
             warn(message);
             return;
         }
         if (foundcycle.length > 0) {
+            ggraph.unselect();
+            for (let i = 0; i < ggraph.nodes.length; i++) {
+                ggraph.nodes[i].hue = 120;
+            }
             message = "graph contains a cycle: </br> ";
             message2 = `${ggraph.nodes[foundcycle[0]].label}`;
             for (let i = 1; i < foundcycle.length; i++) {
+                ggraph.nodes[foundcycle[i]].hue = 180;
+                ggraph.edges[ggraph.get_edge_index(ggraph.nodes[foundcycle[i]], ggraph.nodes[foundcycle[i - 1]])].hue = 240;
                 message2 = `${ggraph.nodes[foundcycle[i]].label} ` + message2;
                 // console.log(foundcycle[i]);
                 if (foundcycle[0] == foundcycle[i]) break;
@@ -279,11 +290,9 @@ async function topologicalsort() {
     }
 
     ggraph.unselect();
-
     for (let i = 0; i < ggraph.nodes.length; i++) {
         ggraph.nodes[i].hue = 120;
     }
-
     return;
 
     // let orphans = [];

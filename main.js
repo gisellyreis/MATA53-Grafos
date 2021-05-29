@@ -6,10 +6,12 @@ let runbutton;
 let clearbutton;
 let warning;
 let algoBox;
-let ggraph = new graph();
+let oldgraph;
+let ggraph;
 const MS_PER_STEP = 500;
 let multiplier = 1;
 function setup() {
+    ggraph = new graph();
     setcanvas();
     setsidebar();
     setAlgorithmBox();
@@ -172,12 +174,12 @@ function windowResized() {
 function setsidebar() {
     let sidebardiv = document.createElement("div");
     document.body.appendChild(sidebardiv);
-    // sidebardiv.style.boxSizing = "border-box";
+    sidebardiv.style.boxSizing = "border-box";
     sidebardiv.style.position = "absolute";
     sidebardiv.style.top = "5%";
     sidebardiv.style.bottom = "5%";
     sidebardiv.style.left = "20px";
-    sidebardiv.style.right = "85%";
+    sidebardiv.style.right = "80%";
     sidebardiv.style.zIndex = 1;
     sidebardiv.style.flexDirection = "column";
     sidebardiv.style.paddingRight = '2%';
@@ -213,6 +215,7 @@ function setsidebar() {
             ggraph.edges[ggraph.selectedindex].setlabel(inputbox.value);
         }
     });
+
     //algorithmselect
     const algorithmselect = document.createElement("select");
     sidebardiv.appendChild(algorithmselect);
@@ -236,22 +239,24 @@ function setsidebar() {
     topologicalsortoption.innerHTML = "Topological sorting";
 
     //speed of algorithm
-    var label = document.createElement("label");
-    label.innerHTML = "Velocidade de reprodução:";
+    let label = document.createElement("label");
+    label.innerHTML = `Speed: 1x`;
+    sidebardiv.appendChild(label);
     label.htmlFor = "speedmult";
     label.style.color = "white";
-    sidebardiv.appendChild(label);
-    const speedmult = document.createElement("select");
+
+    let speedmult = document.createElement("input");
     sidebardiv.appendChild(speedmult);
+    speedmult.addEventListener("input", (e) => {
+        multiplier = speedmult.value;
+        label.innerHTML = `Speed: ${speedmult.value}x`;
+    });
+    speedmult.type = "range";
+    speedmult.min = 0.25;
+    speedmult.max = 2;
+    speedmult.step = 0.25;
+    speedmult.value = 1;
     speedmult.id = speedmult.name = "speedmult";
-    var values = ["0.25", "0.5", "0.75", "Normal", "1.25", "1.5", "1.75", "2"];
-    for (const val of values) {
-        var opt = document.createElement("option");
-        opt.value = val;
-        opt.text = val;
-        if (val == "Normal") opt.defaultSelected = true;
-        speedmult.appendChild(opt);
-    }
 
     //runbutton
     runbutton = document.createElement("button");
@@ -260,7 +265,7 @@ function setsidebar() {
     runbutton.addEventListener("click", async (e) => {
         if (!ggraph.locked) {
             // console.log(algorithmselect.value);
-            multiplier = (speedmult.value == "Normal" ? 1 : parseFloat(speedmult.value));
+            oldgraph = new graph(ggraph);
             switch (algorithmselect.value) {
                 case "boruvka":
                     warn("");
@@ -300,15 +305,39 @@ function setsidebar() {
                     warn("");
                     ggraph.lock();
                     ggraph.unselect();
+
+                    let oldnodes = ggraph.nodes.slice();
                     algoBox.style.visibility = "visible";
                     await topologicalsort();
                     algoBox.style.visibility = "hidden";
+                    ggraph.nodes = oldnodes;
+
                     ggraph.unlock();
                     break;
                 default:
                     warn("no algorithm selected");
                     break;
             }
+        }
+    });
+
+    //savebutton
+    let savebutton = document.createElement("button");
+    sidebardiv.appendChild(savebutton);
+    savebutton.innerHTML = "save current state";
+    savebutton.addEventListener("click", (e) => {
+        if (!ggraph.locked) {
+            oldgraph = new graph(ggraph);
+        }
+    });
+
+    //loadbutton
+    let loadbutton = document.createElement("button");
+    sidebardiv.appendChild(loadbutton);
+    loadbutton.innerHTML = "load last saved state";
+    loadbutton.addEventListener("click", (e) => {
+        if (!ggraph.locked) {
+            ggraph = oldgraph;
         }
     });
 
@@ -319,15 +348,14 @@ function setsidebar() {
     warning.style.overflowY = "auto";
     warning.style.flexGrow = "2";
     warning.style.userSelect = "none";
+    warning.style.border = "1px solid red";
+    warning.style.backgroundColor = "snow";
     warning.innerHTML = "";
 
     //clearbutton
     clearbutton = document.createElement("button");
     sidebardiv.appendChild(clearbutton);
     clearbutton.innerHTML = "clear all nodes";
-    // clearbutton.style.position = "absolute";
-    // clearbutton.style.bottom = "0px";
-    // clearbutton.style.width = "100%";
     clearbutton.addEventListener("click", (e) => {
         if (!ggraph.locked) {
             ggraph.clear();
