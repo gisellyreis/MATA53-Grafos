@@ -258,7 +258,6 @@ function setsidebar() {
     sidebardiv.appendChild(runbutton);
     runbutton.innerHTML = "run algorithm";
     runbutton.addEventListener("click", async (e) => {
-<<<<<<< HEAD
         if (!ggraph.locked) {
             // console.log(algorithmselect.value);
             multiplier = (speedmult.value == "Normal" ? 1 : parseFloat(speedmult.value));
@@ -310,48 +309,6 @@ function setsidebar() {
                     warn("no algorithm selected");
                     break;
             }
-=======
-        // console.log(algorithmselect.value);
-        multiplier = (speedmult.value == "Normal" ? 1 : parseFloat(speedmult.value));
-        switch (algorithmselect.value) {
-            case "topologicalsort":
-                warn("");
-                ggraph.lock();
-                ggraph.unselect();
-                await topologicalsort();
-                ggraph.unlock();
-                break;
-            case "johnsons":
-                ggraph.lock();
-                ggraph.allow_select = true;
-                warn("escolha o nó de partida");
-                while (ggraph.selectedelement != 0) await sleep(50);
-                let source = ggraph.selectedindex;
-                warn("escolha o nó de destino");
-                while (ggraph.selectedelement != 0 || source == ggraph.selectedindex) await sleep(50);
-                let target = ggraph.selectedindex;
-                console.log(source, target);
-                algoBox.style.visibility = "visible";
-                await Johnsons(source, target);
-                ggraph.allow_select = false;
-                ggraph.unlock();
-                break;
-            case "bellmanford":
-                warn("chame aqui a função pro bellman ford");
-                break;
-            case "boruvka":
-                warn("");
-                ggraph.lock();
-                ggraph.unselect();
-                algoBox.style.visibility = "visible";
-                await boruvka();
-                algoBox.style.visibility = "hidden";
-                ggraph.unlock();
-                break;
-            default:
-                warn("no algorithm selected");
-                break;
->>>>>>> 0960851eba45a033fb2877d6964ada9127660332
         }
     });
 
