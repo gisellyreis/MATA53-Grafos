@@ -1,14 +1,26 @@
 async function Johnsons(source, target) {
 
+    var code = new algorithm();
+
+    code.add_step("Grafo direcionado");
+    code.add_step("Bellman-Ford", 3);
+    code.add_step("Recalcula peso das arestas", 3);
+    code.add_step("Dijkstra", 3);
+    code.add_step("Fim", 3);
+
     // step 1 and 2: use bellman ford to calculate h(x) for every x in the graph
     // h(x) is the minimum value i can get for starting in any node in the graph
     // and making a path to x. 
     // to achieve this we create a fictional node Q connected to every node in the graph
     // with distance 0.
+    
+    await code.print(1);
     h = await Bellman();
     if(!h){
         return;
     }
+
+    await code.print(2);
     // reweight the edges using h:
     for(let i=0; i < ggraph.edges.length; i++){
         let u = ggraph.edges[i].uidx;
@@ -19,7 +31,9 @@ async function Johnsons(source, target) {
     }
 
     // finally: run dijkstra to find the shortest path between these two nodes.
+    await code.print(3);
     await Dijkstra(source, target);
+    await code.print(4);
 }
 async function Bellman() {
     let algo = new algorithm();
