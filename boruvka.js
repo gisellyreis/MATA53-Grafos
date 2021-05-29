@@ -2,16 +2,11 @@ var adj;
 var vis;
 
 function non_valid_labels(){
-    re = /^\d{1,9}$/;
-    let values = {}
+    re = /^-?\d{1,9}$/;
     for(var i=0;i<ggraph.edges.length;i++){
         if(!re.test(ggraph.edges[i].label)){
             return true;
         }
-        /*if(values.hasOwnProperty(ggraph.edges[i].label)){
-            return true;
-        }*/
-        values[ggraph.edges[i].label] = true;
     }
     return false;
 }

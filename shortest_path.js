@@ -1,44 +1,64 @@
 async function Johnsons(source, target) {
-
+    if(!only_edges_with_label()){
+        warn("Todas as arestas devem conter custos.");
+        return;
+    }
+    if(non_valid_labels()){
+        warn("Todas as arestas devem conter apenas números.");
+        return;
+    }
+    if(!isdirected()){
+        warn("Todas as arestas devem ser direcionadas.");
+        return;
+    }
     var code = new algorithm();
 
-    code.add_step("Grafo direcionado");
-    code.add_step("Bellman-Ford", 3);
-    code.add_step("Recalcula peso das arestas", 3);
-    code.add_step("Dijkstra", 3);
-    code.add_step("Fim", 3);
+    code.add_step("se G um grafo direcionado.");
+    code.add_step("Seja H a lista resultante do algoritmo de Bellman-Ford executado com G.");
+    code.add_step("Para cada aresta (u, v) com peso c de G faça:");
+    code.add_step("atualize o valor de c para c + H[u] - H[v].", 3);
+    code.add_step("seja D a lista resultante do algoritmo de Dijkstra com G.");
+    code.add_step("Retorne a menor distância entre os vértices escolhidos utilizando D.");  
 
     // step 1 and 2: use bellman ford to calculate h(x) for every x in the graph
     // h(x) is the minimum value i can get for starting in any node in the graph
     // and making a path to x. 
     // to achieve this we create a fictional node Q connected to every node in the graph
     // with distance 0.
-    
-    await code.print(1);
+    await code.print(0);
+    await code.print(1, 1500);
     h = await Bellman();
     if(!h){
         return;
     }
 
-    await code.print(2);
     // reweight the edges using h:
     for(let i=0; i < ggraph.edges.length; i++){
         let u = ggraph.edges[i].uidx;
         let v = ggraph.edges[i].vidx;
+        let old_hue = ggraph.edges[i].hue;
+        ggraph.edges[i].hue = 150;
+        await code.print(2);
         let c = parseInt(ggraph.edges[i].label);
         c += h[u] - h[v];
+        await code.print(3);
         ggraph.edges[i].label = c.toString();
+        ggraph.edges[i].hue = old_hue;
     }
 
     // finally: run dijkstra to find the shortest path between these two nodes.
-    await code.print(3);
-    await Dijkstra(source, target);
+    await code.print(3, 1500);
+    let res = await Dijkstra(source, target);
     await code.print(4);
+    for(let i=0; i<ggraph.nodes.length; i++){
+        if(ggraph.nodes[i].label != "oo") ggraph.nodes[i].label = (res[i] + h[i] - h[source]).toString(); 
+    }
+    warn("A menor distância entre os dois vértices escolhidos é de: " + ggraph.nodes[target].label);
 }
 async function Bellman() {
     let algo = new algorithm();
-    algo.add_step("G é um grafo com n nós.")
-    algo.add_step("Inicialize dois vetores D e P de tamanho n.\n     D é o vetor de distâncias e P o vetor auxiliar para detectar ciclo negativo.");
+    algo.add_step("Bellman-Ford:\n   G é um grafo com n nós.")
+    algo.add_step("Inicialize dois vetores D e P de tamanho n.\n   D é o vetor de distâncias e P o vetor auxiliar para detectar ciclo negativo.");
     algo.add_step("")
     algo.add_step("Repita n-1 vezes:")
     algo.add_step("Para cada aresta (u, v) com peso c em G faça:", 3);
@@ -126,7 +146,7 @@ async function Bellman() {
 
 async function Dijkstra(source, target) {
     let algo = new algorithm();
-    algo.add_step("G é um grafo com n nós. s é um vértice de G. Calcularemos a menor distância de todos os vértices até s.");
+    algo.add_step("Dijkstra:\n   G é um grafo com n nós. s é um vértice de G. Calcularemos a menor distância de todos os vértices até s.");
     algo.add_step("Inicialize dois vetores D e V de tamanho n.\n     D é o vetor de distâncias e V o vetor que diz se um vértice já foi utilizado.");
     algo.add_step("D é inicializado com D[v] = oo para cada vértice v em G.");
     algo.add_step("V é inicializado com V[v] = false para cada vértice v em G.");

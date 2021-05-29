@@ -339,7 +339,7 @@ class algorithm {
         this.steps.push(" ".repeat(indent + 3) + step);
     }
 
-    async print(at_step = -1) {
+    async print(at_step = -1, wait_time = null) {
         let alg = "";
         for (var i = 0; i < this.steps.length; i++) {
             if (i == at_step) {
@@ -351,7 +351,8 @@ class algorithm {
         }
         //console.log(alg);
         this.write(`<pre><code>` + alg + `</code></pre>`);
-        await sleep(MS_PER_STEP / multiplier);
+        if(!wait_time) await sleep(MS_PER_STEP / multiplier);
+        else await sleep(wait_time / multiplier);
     }
 
     write(code) {
