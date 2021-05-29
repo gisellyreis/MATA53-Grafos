@@ -30,9 +30,6 @@ function warn(message) {
 function draw() {
     background("#1f1f1f");
 
-    noFill(); stroke(100); strokeWeight(1);
-    line(windowWidth * 0.17, windowHeight * 0.05, windowWidth * 0.17, windowHeight * 0.95);
-
     if (!ggraph.locked) {
         if (ggraph.selectedelement == 0) {
             inputbox.value = ggraph.nodes[ggraph.selectedindex].label;
@@ -175,6 +172,7 @@ function windowResized() {
 function setsidebar() {
     let sidebardiv = document.createElement("div");
     document.body.appendChild(sidebardiv);
+    // sidebardiv.style.boxSizing = "border-box";
     sidebardiv.style.position = "absolute";
     sidebardiv.style.top = "5%";
     sidebardiv.style.bottom = "5%";
@@ -182,6 +180,8 @@ function setsidebar() {
     sidebardiv.style.right = "85%";
     sidebardiv.style.zIndex = 1;
     sidebardiv.style.flexDirection = "column";
+    sidebardiv.style.paddingRight = '2%';
+    sidebardiv.style.borderRight = '1px solid white';
 
     //instructions
     let instructions = document.createElement("p");
