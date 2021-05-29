@@ -6,9 +6,9 @@ let runbutton;
 let clearbutton;
 let warning;
 let algoBox;
-const ggraph = new graph();
+let ggraph = new graph();
 const MS_PER_STEP = 500;
-var multiplier = 1;
+let multiplier = 1;
 function setup() {
     setcanvas();
     setsidebar();
@@ -222,22 +222,18 @@ function setsidebar() {
     placeholderoption.disabled = true;
     placeholderoption.defaultSelected = true;
     algorithmselect.appendChild(placeholderoption);
-    const topologicalsortoption = document.createElement("option");
-    algorithmselect.appendChild(topologicalsortoption);
-    topologicalsortoption.value = "topologicalsort";
-    topologicalsortoption.innerHTML = "Topological sorting";
-    const johnsonsoption = document.createElement("option");
-    algorithmselect.appendChild(johnsonsoption);
-    johnsonsoption.value = "johnsons";
-    johnsonsoption.innerHTML = "Johnson's algorithm";
-    const bellmanfordoption = document.createElement("option");
-    algorithmselect.appendChild(bellmanfordoption);
-    bellmanfordoption.value = "bellmanford";
-    bellmanfordoption.innerHTML = "Bellman-Ford algorithm";
     const boruvkaoption = document.createElement("option");
     algorithmselect.appendChild(boruvkaoption);
     boruvkaoption.value = "boruvka";
     boruvkaoption.innerHTML = "Borůvka's algorithm";
+    const johnsonsoption = document.createElement("option");
+    algorithmselect.appendChild(johnsonsoption);
+    johnsonsoption.value = "johnsons";
+    johnsonsoption.innerHTML = "Johnson's algorithm";
+    const topologicalsortoption = document.createElement("option");
+    algorithmselect.appendChild(topologicalsortoption);
+    topologicalsortoption.value = "topologicalsort";
+    topologicalsortoption.innerHTML = "Topological sorting";
 
     //speed of algorithm
     var label = document.createElement("label");
@@ -262,45 +258,55 @@ function setsidebar() {
     sidebardiv.appendChild(runbutton);
     runbutton.innerHTML = "run algorithm";
     runbutton.addEventListener("click", async (e) => {
-        // console.log(algorithmselect.value);
-        multiplier = (speedmult.value == "Normal" ? 1 : parseFloat(speedmult.value));
-        switch (algorithmselect.value) {
-            case "topologicalsort":
-                warn("");
-                ggraph.lock();
-                ggraph.unselect();
-                await topologicalsort();
-                ggraph.unlock();
-                break;
-            case "johnsons":
-                ggraph.lock();
-                ggraph.allow_select = true;
-                warn("escolha o nó de partida");
-                while (ggraph.selectedelement != 0) await sleep(50);
-                let source = ggraph.selectedindex;
-                warn("escolha o nó de destino");
-                while (ggraph.selectedelement != 0 || source == ggraph.selectedindex) await sleep(50);
-                let target = ggraph.selectedindex;
-                console.log(source, target);
-                await Johnsons(source, target);
-                ggraph.allow_select = false;
-                ggraph.unlock();
-                break;
-            case "bellmanford":
-                warn("chame aqui a função pro bellman ford");
-                break;
-            case "boruvka":
-                warn("");
-                ggraph.lock();
-                ggraph.unselect();
-                algoBox.style.visibility = "visible";
-                await boruvka();
-                algoBox.style.visibility = "hidden";
-                ggraph.unlock();
-                break;
-            default:
-                warn("no algorithm selected");
-                break;
+        if (!ggraph.locked) {
+            // console.log(algorithmselect.value);
+            multiplier = (speedmult.value == "Normal" ? 1 : parseFloat(speedmult.value));
+            switch (algorithmselect.value) {
+                case "boruvka":
+                    warn("");
+                    ggraph.lock();
+                    ggraph.unselect();
+                    algoBox.style.visibility = "visible";
+                    await boruvka();
+                    algoBox.style.visibility = "hidden";
+                    ggraph.unlock();
+                    break;
+                case "johnsons":
+                    ggraph.lock();
+                    ggraph.allow_select = true;
+
+                    ggraph.unselect();
+                    warn("primeiro escolha o nó de partida");
+                    while (ggraph.selectedelement != 0) await sleep(50);
+                    let source = ggraph.selectedindex;
+                    ggraph.unselect();
+
+                    warn("agora escolha o nó de destino");
+                    while (ggraph.selectedelement != 0 || source == ggraph.selectedindex) await sleep(50);
+                    let target = ggraph.selectedindex;
+                    ggraph.unselect();
+
+                    warn("");
+                    console.log(source, target);
+
+                    await Johnsons(source, target);
+
+                    ggraph.allow_select = false;
+                    ggraph.unlock();
+                    break;
+                case "topologicalsort":
+                    warn("");
+                    ggraph.lock();
+                    ggraph.unselect();
+                    algoBox.style.visibility = "visible";
+                    await topologicalsort();
+                    algoBox.style.visibility = "hidden";
+                    ggraph.unlock();
+                    break;
+                default:
+                    warn("no algorithm selected");
+                    break;
+            }
         }
     });
 

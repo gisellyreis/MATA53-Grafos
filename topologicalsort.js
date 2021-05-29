@@ -136,33 +136,52 @@ async function topologicalsort() {
     // }
     // console.log(adjmatrix);
 
-    let adjacency_matrix = ggraph.get_adjacency_matrix();
-    // console.log(adjacency_matrix);
+    const algo = new algorithm();
+    algo.add_step("input: um grafo acíclico direcionado");
+    algo.add_step("output: uma ordenação topológica dos vértices do grafo");
+    algo.add_step("");
+    algo.add_step("enquanto houver vértices verdes:");
+    algo.add_step("selecione um vértice u verde e pinte de amarelo", 3);
+    algo.add_step("execute pinta_vértices_dfs(u)", 3);
+    algo.add_step("");
+    algo.add_step("pinta_vértices_dfs(vértice u):");
+    algo.add_step("se o vértice u for vermelho:", 3);
+    algo.add_step("retorne", 6);
+    algo.add_step("se o vértice u for azul:", 3);
+    algo.add_step("o grafo não é acíclico, portanto pare", 6);
+    algo.add_step("pinte u de azul", 3);
+    algo.add_step("para cada vértice v com uma aresta u->v:", 3);
+    algo.add_step("execute pinta_vértices_dfs(v)", 6);
+    algo.add_step("pinte u de vermelho", 3);
+    algo.add_step("adicione u na frente da lista", 3);
 
-    let order = [];
-    let foundcycle = [];
-    let undirected = {found: false, u: -1, v: -1};
-    let visited = new Array(adjacency_matrix.length);
-    let marked = new Array(adjacency_matrix.length);
-    for (let j = 0; j < visited.length; j++) {
-        marked[j] = false;
-        visited[j] = false;
-    }
-
-    function topologicalsortdfs(node) {
-        if (marked[node]) return;
+    async function topologicalsortdfs(node) {
+        ggraph.selectedelement = 0;
+        ggraph.selectedindex = node;
+        await algo.print(8);
+        await algo.print(9);
+        if (marked[node]) {
+            await algo.print(10);
+            return;
+        }
+        await algo.print(11);
         if (visited[node]) {
+            await algo.print(12);
             foundcycle.push(node);
             return;
         }
 
+        ggraph.nodes[node].hue = 240; //azul
+        await algo.print(13);
         visited[node] = true;
         for (let i = 0; i < adjacency_matrix.length; i++) {
             switch (adjacency_matrix[node][i]) {
                 case -1:
                     break;
                 case 1:
-                    topologicalsortdfs(i);
+                    await algo.print(14);
+                    await algo.print(15);
+                    await topologicalsortdfs(i);
                     if (undirected.found) return;
                     if (foundcycle.length > 0) {
                         foundcycle.push(node);
@@ -176,11 +195,14 @@ async function topologicalsort() {
                     return;
             }
         }
+        ggraph.nodes[node].hue = 0; //vermelho
+        await algo.print(16);
         marked[node] = true;
         visited[node] = false;
+        await algo.print(17);
         order.unshift(node);
+        reorder();
     }
-
 
     function get_unmarked() {
         for (let i = 0; i < marked.length; i++) {
@@ -189,11 +211,54 @@ async function topologicalsort() {
         return -1;
     }
 
+    function reorder() {
+        // console.log(order);
+        const start = windowWidth * 0.2;
+        const block = (windowWidth * 0.8) / order.length;
+        for (let i = 0; i < order.length; i++) {
+            const startx = ggraph.nodes[order[i]].x;
+            const starty = ggraph.nodes[order[i]].y;
+            const finalx = start + block * i;
+            const finaly = windowHeight / 2; // Math.floor(Math.random() * windowHeight / 2) + windowHeight / 4;
+            const stepx = (finalx - startx) / 1000;
+            const stepy = (finaly - starty) / 1000;
+            const starttime = Date.now();
+            let currenttime = Date.now();
+            const interval = setInterval(() => {
+                currenttime = Date.now();
+                ggraph.nodes[order[i]].x = startx + stepx * (currenttime - starttime);
+                ggraph.nodes[order[i]].y = starty + stepy * (currenttime - starttime);
+                if ((currenttime - starttime) >= 1000) {
+                    clearInterval(interval);
+                }
+            });
+            sleep(1000);
+            ggraph.nodes[order[i]].x = finalx;
+            ggraph.nodes[order[i]].y = finaly;
+        }
+    }
+
+    let adjacency_matrix = ggraph.get_adjacency_matrix();
+    // console.log(adjacency_matrix);
+
+    await algo.print(3);
+    let order = [];
+    let foundcycle = [];
+    let undirected = {found: false, u: -1, v: -1};
+    let visited = new Array(adjacency_matrix.length);
+    let marked = new Array(adjacency_matrix.length);
+    for (let j = 0; j < visited.length; j++) {
+        marked[j] = false;
+        visited[j] = false;
+    }
+
     let unmarked;
-    while (true) {
-        unmarked = get_unmarked();
-        if (unmarked < 0) break;
-        topologicalsortdfs(unmarked);
+    while ((unmarked = get_unmarked()) >= 0) {
+        await algo.print(4);
+        ggraph.nodes[unmarked].hue = 60; //amarelo
+        await algo.print(5);
+        await algo.print(6);
+        await topologicalsortdfs(unmarked);
         if (undirected.found) {
             message = "graph contains an undirected edge: </br> ";
             message += `${ggraph.edges[ggraph.get_edge_index(undirected.u, undirected.v)].label}`;
@@ -213,21 +278,29 @@ async function topologicalsort() {
         }
     }
 
+    ggraph.unselect();
+
+    for (let i = 0; i < ggraph.nodes.length; i++) {
+        ggraph.nodes[i].hue = 120;
+    }
+
+    return;
+
     // let orphans = [];
     // for (let i = 0; i < adjmatrix.length; i++) {
     //     if (adjmatrix[i].length == 1) {
-    //         orphans.push(i);
+    //         orphans.push(i);    
     //     }
     // }
 
     // while (orphans.length > 0) {
-    //     order.push(orphans[0]);
+    //     order.push(orphans[0]);    
     //     for (let i = 0; i < adjmatrix.length; i++) {
-    //         const pos = adjmatrix[i].indexOf(orphans[0]);
+    //         const pos = adjmatrix[i].indexOf(orphans[0]);    
     //         if (pos != -1) {
-    //             adjmatrix[i].splice(pos, 1);
+    //             adjmatrix[i].splice(pos, 1);    
     //             if (adjmatrix[i].length == 1) {
-    //                 orphans.push(adjmatrix[i][0]);
+    //                 orphans.push(adjmatrix[i][0]);    
     //             }
     //         }
     //     }
@@ -235,33 +308,7 @@ async function topologicalsort() {
     // }
 
     // for (let i = 0; i < ggraph.nodes.length; i++) {
-    //     ggraph.nodes[i].label = "";
+    //     ggraph.nodes[i].label = "";    
     //     ggraph.nodes[i].hue = 0;
-    // }
-
-    // console.log(order);
-    const start = windowWidth * 0.2;
-    const block = (windowWidth * 0.8) / order.length;
-    for (let i = 0; i < order.length; i++) {
-        const startx = ggraph.nodes[order[i]].x;
-        const starty = ggraph.nodes[order[i]].y;
-        const finalx = start + block * i;
-        const finaly = windowHeight / 2; // Math.floor(Math.random() * windowHeight / 2) + windowHeight / 4;
-        const stepx = (finalx - startx) / 1000;
-        const stepy = (finaly - starty) / 1000;
-        const starttime = Date.now();
-        let currenttime = Date.now();
-        const interval = setInterval(() => {
-            currenttime = Date.now();
-            ggraph.nodes[order[i]].x = startx + stepx * (currenttime - starttime);
-            ggraph.nodes[order[i]].y = starty + stepy * (currenttime - starttime);
-            if ((currenttime - starttime) >= 1000) {
-                clearInterval(interval);
-            }
-        });
-        await new Promise(r => setTimeout(r, 1000));
-        ggraph.nodes[order[i]].x = finalx;
-        ggraph.nodes[order[i]].y = finaly;
-    }
-    return;
+    // }    
 }
