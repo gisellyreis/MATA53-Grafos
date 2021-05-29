@@ -119,6 +119,7 @@ class graph {
         this.selectedelement = -1; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
         this.selectedindex = -1; // index of the selected element in the according type's array
         this.locked = false;
+        this.allow_select = false;
     }
 
     lock() {

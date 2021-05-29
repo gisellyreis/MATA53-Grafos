@@ -103,7 +103,7 @@ function setcanvas() {
     });
 
     canvas.elt.addEventListener("click", () => {
-        if (!ggraph.locked) {
+        if (!ggraph.locked || ggraph.allow_select) {
             if (mouseX <= windowWidth * 0.17) return;
             ggraph.select(mouseX, mouseY);
             if (ggraph.selectedelement != -1) {
@@ -273,14 +273,17 @@ function setsidebar() {
                 ggraph.unlock();
                 break;
             case "johnsons":
-                warn("");
-                var source = ggraph.selectedindex;
-                var target;
-                setTimeout(async function() {
-                    target = ggraph.selectedindex;
-                    console.log(source, target);
-                    await Johnsons(source, target);
-                }, 5000);
+                ggraph.lock();
+                ggraph.allow_select = true;
+                warn("escolha o nó de partida");
+                while (ggraph.selectedelement != 0) await sleep(50);
+                let source = ggraph.selectedindex;
+                warn("escolha o nó de destino");
+                while (ggraph.selectedelement != 0 || source == ggraph.selectedindex) await sleep(50);
+                let target = ggraph.selectedindex;
+                console.log(source, target);
+                await Johnsons(source, target);
+                ggraph.unlock();
                 break;
             case "bellmanford":
                 warn("chame aqui a função pro bellman ford");
