@@ -57,6 +57,8 @@ class edge {
     constructor(u, v) {
         this.u = u;
         this.v = v;
+        this.uidx = ggraph.nodes.indexOf(u);
+        this.vidx = ggraph.nodes.indexOf(v);
         this.direction = 2; // |  0: u -> v  |  1: u <- v  |  2: u - v  |
 
         this.weight = 1;
