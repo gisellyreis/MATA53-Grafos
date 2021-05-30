@@ -218,8 +218,8 @@ class edge {
             let arcpoint = polartocartesian(midpoint, dist / 2, this.height, i);
             arcpoint = rotateonpoint(arcpoint, midpoint, baseangle);
             // stroke(240, 100, 50);
-            // ellipse(arcpoint.x, arcpoint.y, 5, 5);
-            if ((x - arcpoint.x) * (x - arcpoint.x) + (y - arcpoint.y) * (y - arcpoint.y) <= 5 * 5) {
+            // ellipse(arcpoint.x, arcpoint.y, 10, 10);
+            if ((x - arcpoint.x) * (x - arcpoint.x) + (y - arcpoint.y) * (y - arcpoint.y) <= 10 * 10) {
                 return true;
             }
         }
@@ -341,8 +341,8 @@ class graph {
 
     addegde(u, v) {
         if (u != v) {
-            // let es = this.get_edges(u, v);
-            let e = new edge(u, v, 0);
+            let es = this.get_edges(u, v);
+            let e = new edge(u, v, 15 * es.length);
             this.edges.push(e);
         }
         // console.log(this)
@@ -350,8 +350,8 @@ class graph {
 
     adddirectedegde(u, v) {
         if (u != v) {
-            // let es = this.get_edges(u, v);
-            let e = new edge(u, v, 0);
+            let es = this.get_edges(u, v);
+            let e = new edge(u, v, 15 * es.length);
             e.directed = true;
             this.edges.push(e);
         }
