@@ -13,12 +13,12 @@ async function Johnsons(source, target) {
     }
     var code = new algorithm();
 
-    code.add_step("se G um grafo direcionado.");
-    code.add_step("Seja H a lista resultante do algoritmo de Bellman-Ford executado com G.");
-    code.add_step("Para cada aresta (u, v) com peso c de G faça:");
-    code.add_step("atualize o valor de c para c + H[u] - H[v].", 3);
-    code.add_step("seja D a lista resultante do algoritmo de Dijkstra com G.");
-    code.add_step("Retorne a menor distância entre os vértices escolhidos utilizando D.");  
+    code.add_step("se G um grafo direcionado, source e target os vértices selecionados.");
+    code.add_step("seja H a lista resultante do algoritmo de Bellman-Ford começando de um vértice\n   fictício 'q' que é conectado com todos os outros vértices com peso 0.");
+    code.add_step("para cada aresta (u, v) com peso c de G faça:");
+    code.add_step("atualize o valor de c para c + H[u] - H[v].", 4);
+    code.add_step("seja D a lista resultante do algoritmo de Dijkstra começando em source.");
+    code.add_step("a menor distância entre os source e target é D[target] + H[target] - H[source].");  
 
     // step 1 and 2: use bellman ford to calculate h(x) for every x in the graph
     // h(x) is the minimum value i can get for starting in any node in the graph
@@ -53,6 +53,14 @@ async function Johnsons(source, target) {
     for(let i=0; i<ggraph.nodes.length; i++){
         if(ggraph.nodes[i].label != "oo") ggraph.nodes[i].label = (res[i] + h[i] - h[source]).toString(); 
     }
+    for(let i=0; i<ggraph.edges.length; i++){
+        let u = ggraph.edges[i].uidx;
+        let v = ggraph.edges[i].vidx;
+        let c = parseInt(ggraph.edges[i].label);
+        c -= h[u] - h[v];
+        ggraph.edges[i].label = c.toString();
+    }
+    await code.print(5, 1500);
     warn("A menor distância entre os dois vértices escolhidos é de: " + ggraph.nodes[target].label);
 }
 async function Bellman() {
@@ -66,7 +74,6 @@ async function Bellman() {
     algo.add_step("D[v] = D[u] + c", 9);
     algo.add_step("P[v] = u", 9);
     algo.add_step("");
-    algo.add_step("Agora se for possível relaxar o custo de mais algum caminho, então temos um ciclo negativo:");
     algo.add_step("Para cada aresta (u, v) com peso c em G faça:");
     algo.add_step("se D[v] > D[u] + c então:", 3);
     algo.add_step("T = {}", 6);
@@ -82,7 +89,7 @@ async function Bellman() {
     let n = ggraph.nodes.length;
     for(let i=0; i < n; i++){
         h.push(0);
-        from.push(0);
+        from.push([0, 0]);
     }
     await algo.print(1);
     // h is the distance from Q to every node in the graph.
@@ -103,60 +110,60 @@ async function Bellman() {
             if(h[v] > h[u] + c){
                 h[v] = h[u] + c;
                 await algo.print(6);
-                from[v] = u;
+                from[v] = [u, j];
                 await algo.print(7);
             }
             ggraph.edges[j].hue = old_hue;
         }
     }
-    await algo.print(8); await algo.print(9);
+    await algo.print(8);
     for(let j=0; j < m; j++){ // if at the nth iteration there is a relaxation, there is a negative cycle.
-        await algo.print(10);
+        await algo.print(10-1);
         let old_hue = ggraph.edges[j].hue;
         ggraph.edges[j].hue = 150;
         let u = ggraph.edges[j].uidx;
         let v = ggraph.edges[j].vidx;
         let c = parseInt(ggraph.edges[j].label);
-        await algo.print(11);
+        await algo.print(11-1);
         if(h[v] > h[u] + c){
             ggraph.edges[j].hue = old_hue;
-            await algo.print(12);
+            await algo.print(12-1);
             let at = v;
-            await algo.print(13);
-            while(from[at] != -1){
-                await algo.print(14);
-                ggraph.edges[ggraph.get_edge_index(at, from[at])].hue = 240;
-                await algo.print(15);
-                let x = from[at];
-                await algo.print(16);
-                from[at] = -1;
-                await algo.print(17);
+            await algo.print(13-1);
+            while(from[at][0] != -1){
+                await algo.print(14-1);
+                ggraph.edges[from[at][1]].hue = 240;
+                await algo.print(15-1);
+                let x = from[at][0];
+                await algo.print(16-1);
+                from[at][0] = -1;
+                await algo.print(17-1);
                 at = x;
-                await algo.print(18);
+                await algo.print(18-1);
             }
             warn("Existe um ciclo negativo no grafo.");
-            await algo.print(19);
+            await algo.print(19-1);
             return null;
         }
         ggraph.edges[j].hue = old_hue;
     }
-    await algo.print(20);
+    await algo.print(20-1);
     return h;
 }
 
 async function Dijkstra(source, target) {
     let algo = new algorithm();
-    algo.add_step("Dijkstra:\n   G é um grafo com n nós. s é um vértice de G. Calcularemos a menor distância de todos os vértices até s.");
-    algo.add_step("Inicialize dois vetores D e V de tamanho n.\n     D é o vetor de distâncias e V o vetor que diz se um vértice já foi utilizado.");
+    algo.add_step("Dijkstra:\n   G é um grafo com n nós. s é um vértice de G.\n   Calcularemos a menor distância de todos os vértices até s.");
+    algo.add_step("Inicialize dois vetores D e V de tamanho n.\n   D é o vetor de distâncias e V o vetor que diz se um vértice já foi utilizado.");
     algo.add_step("D é inicializado com D[v] = oo para cada vértice v em G.");
-    algo.add_step("V é inicializado com V[v] = false para cada vértice v em G.");
+    algo.add_step("V é inicializado com V[v] = falso para cada vértice v em G.");
     algo.add_step("");
     algo.add_step("D[s] = 0");
     algo.add_step("Enquanto houver vértices não visitados faça:");
     algo.add_step("seja u um vértice v de G não visitado com menor valor D[v].", 3);
     algo.add_step("se D[u] é oo então:", 3);
     algo.add_step("Pare.", 6);
-    algo.add_step("V[u] = true", 3);
+    algo.add_step("V[u] = verdadeiro", 3);
     algo.add_step("para cada vértice v conectado à u com peso c faça:", 3);
     algo.add_step("se D[v] > D[u] + c então:", 6);
     algo.add_step("D[v] = D[u] + c", 9);
@@ -192,21 +199,25 @@ async function Dijkstra(source, target) {
         ggraph.nodes[u].saturation = 0;
         vis[u] = true;
         await algo.print(10);
+        adj[u] = adj[u].filter((value, index, self) => self.indexOf(value) === index)
         for(let e=0; e < adj[u].length; e++){
             let v = adj[u][e];
-            let idx = ggraph.get_edge_index(u, v);
-            let old_hue = ggraph.edges[idx].hue;
-            ggraph.edges[idx].hue = 150;
-            await algo.print(11);
-            let c = parseInt(ggraph.edges[idx].label);
-            
-            await algo.print(12);
-            if(distance[v] > distance[u] + c){
-                await algo.print(13);
-                distance[v] = distance[u] + c;
-                ggraph.nodes[v].label = distance[v].toString();
+            let edges = ggraph.get_edges(u, v);
+            for(let j=0;j<edges.length;j++){
+                let idx = edges[j];
+                let old_hue = ggraph.edges[idx].hue;
+                ggraph.edges[idx].hue = 150;
+                await algo.print(11);
+                let c = parseInt(ggraph.edges[idx].label);
+                
+                await algo.print(12);
+                if(distance[v] > distance[u] + c){
+                    await algo.print(13);
+                    distance[v] = distance[u] + c;
+                    ggraph.nodes[v].label = distance[v].toString();
+                }
+                ggraph.edges[idx].hue = old_hue;
             }
-            ggraph.edges[idx].hue = old_hue;
         }
     }
     for(let i=0;i<n;i++){
