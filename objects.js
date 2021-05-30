@@ -6,9 +6,35 @@ function ptoldist(xp, yp, xa, ya, xb, yb) {
     return abs((xb - xa) * (ya - yp) - (xa - xp) * (yb - ya)) / ptopdist(xa, ya, xb, yb);
 }
 
-function lineangle(xa, ya, xb, yb) {
+function anglefromline(xa, ya, xb, yb) {
+    //angle XAB, X is a positive point in the x axis
     return Math.atan2((ya - yb), (xa - xb));
 }
+
+function rotateonpoint(p, c, angle) {
+    let ret = {x: 0, y: 0};
+    ret.x = p.x - c.x;
+    ret.y = p.y - c.y;
+    let aux = {x: 0, y: 0};
+    aux.x = ret.x;
+    aux.y = ret.y;
+    aux.x = ret.x * Math.cos(angle) - ret.y * Math.sin(angle);
+    aux.y = ret.x * Math.sin(angle) + ret.y * Math.cos(angle);
+    ret.x = aux.x + c.x;
+    ret.y = aux.y + c.y;
+    return ret;
+}
+
+function polartocartesian(c, w, h, angle) {
+    // console.log(c, w, h, angle);
+    return {x: c.x + w * Math.cos(angle), y: c.y + h * Math.sin(angle)};
+}
+
+const element = {
+    none: -1,
+    node: 0,
+    edge: 1,
+};
 
 class node {
     constructor(x, y, r) {
@@ -54,12 +80,14 @@ class node {
 }
 
 class edge {
-    constructor(u, v) {
+    constructor(u, v, h) {
         this.u = u;
         this.v = v;
         this.uidx = ggraph.nodes.indexOf(u);
         this.vidx = ggraph.nodes.indexOf(v);
-        this.direction = 2; // |  0: u -> v  |  1: u <- v  |  2: u - v  |
+        this.directed = false;
+        this.height = h == 0 ? 0.01 : h;
+        this.togglecount = 0;
 
         this.weight = 1;
 
@@ -69,29 +97,91 @@ class edge {
         this.label = "";
     }
 
-    draw() {
-        stroke(this.hue, this.saturation, this.lightness); strokeWeight(3);
-        line(this.u.x, this.u.y, this.v.x, this.v.y);
-        if (this.direction == 0) {
-            // u -> v
-            let angle = lineangle(this.v.x, this.v.y, this.u.x, this.u.y);
-            let borderpoint = {};
-            borderpoint.x = this.v.x - Math.cos(angle) * this.v.r;
-            borderpoint.y = this.v.y - Math.sin(angle) * this.v.r;
-            line(borderpoint.x, borderpoint.y, borderpoint.x - Math.cos(angle + Math.PI / 6) * 15, borderpoint.y - Math.sin(angle + Math.PI / 6) * 15);
-            line(borderpoint.x, borderpoint.y, borderpoint.x - Math.cos(angle - Math.PI / 6) * 15, borderpoint.y - Math.sin(angle - Math.PI / 6) * 15);
-        } else if (this.direction == 1) {
-            // u <- v
-            let angle = lineangle(this.u.x, this.u.y, this.v.x, this.v.y);
-            let borderpoint = {};
-            borderpoint.x = this.u.x - Math.cos(angle) * this.u.r;
-            borderpoint.y = this.u.y - Math.sin(angle) * this.u.r;
-            line(borderpoint.x, borderpoint.y, borderpoint.x - Math.cos(angle + Math.PI / 6) * 15, borderpoint.y - Math.sin(angle + Math.PI / 6) * 15);
-            line(borderpoint.x, borderpoint.y, borderpoint.x - Math.cos(angle - Math.PI / 6) * 15, borderpoint.y - Math.sin(angle - Math.PI / 6) * 15);
+    find_intersect_angle(midpoint, lineangle) {
+        let low;
+        let high;
+        let mid;
+        low = 3 * Math.PI / 2;
+        high = 2 * Math.PI;
+        for (let i = 0; i < 20; i++) {
+            mid = (low + high) / 2;
+            let inarc = polartocartesian(midpoint, ptopdist(this.v.x, this.v.y, midpoint.x, midpoint.y), this.height, mid);
+            inarc = rotateonpoint(inarc, midpoint, lineangle);
+            // stroke(60, 100, 50);
+            // point(inarc.x, inarc.y);
+            if (this.v.contains(inarc.x, inarc.y)) {
+                high = mid;
+            } else {
+                low = mid;
+            }
         }
+        // for (let i = low; i < high; i += 0.1) {
+        //     let inarc = polartocartesian(midpoint, ptopdist(this.v.x, this.v.y, midpoint.x, midpoint.y), this.height, i);
+        //     inarc = rotateonpoint(inarc, midpoint, lineangle);
+        //     // console.log(inarc);
+        //     point(inarc.x, inarc.y);
+        // }
+        return mid;
+    }
 
+    draw(lightness = this.lightness) {
+        noFill(); stroke(this.hue, this.saturation, lightness); strokeWeight(3);
+
+        let baseangle = anglefromline(this.v.x, this.v.y, this.u.x, this.u.y);
+        let midpoint = {};
+        midpoint.x = (this.u.x + this.v.x) / 2;
+        midpoint.y = (this.u.y + this.v.y) / 2;
+        let dist = ptopdist(this.v.x, this.v.y, this.u.x, this.u.y);
+        push();
+        translate(midpoint.x, midpoint.y);
+        rotate(baseangle);
+        if (this.height < 0) {
+            arc(0, 0, dist / 2, this.height == 0 ? 0.01 : this.height, 0, Math.PI);
+        } else {
+            arc(0, 0, dist / 2, this.height == 0 ? 0.01 : this.height, Math.PI, 0);
+        }
+        // stroke(240, 100, 50);
+        pop();
+
+        // arc(midpoint.x, midpoint.y, dist / 2, 50, 2 * Math.PI / 2, 3 * Math.PI / 2);
+        // arc(midpoint.x, midpoint.y, dist / 2, this.height, 3 * Math.PI / 2, 4 * Math.PI / 2);
+        if (this.directed) {
+            // console.log(this);
+            let intersectionangle = this.find_intersect_angle(midpoint, baseangle);
+
+            // for (let i = 0; i < 1 * Math.PI; i += 0.01) {
+            //     let intp = polartocartesian(midpoint, dist / 2, this.height, i);
+            //     // push();
+            //     // rotate(-baseangle);
+            //     // translate(-midpoint.x, -midpoint.y);
+            //     point(intp.x, intp.y);
+            //     // pop();
+            // }
+            let intersectionpoint = polartocartesian(midpoint, dist / 2, this.height, intersectionangle);
+            intersectionpoint = rotateonpoint(intersectionpoint, midpoint, baseangle);
+            let outpoint = polartocartesian(midpoint, dist / 2, this.height, intersectionangle - 0.01);
+            outpoint = rotateonpoint(outpoint, midpoint, baseangle);
+            let inpoint = polartocartesian(midpoint, dist / 2, this.height, intersectionangle + 0.01);
+            inpoint = rotateonpoint(inpoint, midpoint, baseangle);
+            let angleofattack = anglefromline(outpoint.x, outpoint.y, inpoint.x, inpoint.y);
+
+            push();
+            translate(intersectionpoint.x, intersectionpoint.y);
+            rotate(angleofattack);
+            rotate(Math.PI / 6);
+            line(0, 0, 15, 0);
+            rotate(-2 * Math.PI / 6);
+            line(0, 0, 15, 0);
+            pop();
+        }
+        push();
+        translate(midpoint.x, midpoint.y);
+        rotate(baseangle);
+        translate(0, -this.height);
+        rotate(-baseangle);
         fill(90); stroke(0); strokeWeight(2);
-        text(this.label, min(this.u.x, this.v.x) + abs(this.u.x - this.v.x) / 2, min(this.u.y, this.v.y) + abs(this.u.y - this.v.y) / 2);
+        text(this.label, 0, 0);
+        pop();
     }
 
     clear() {
@@ -102,11 +192,61 @@ class edge {
     }
 
     toggledirection() {
-        this.direction = (this.direction + 1) % 3;
+        switch (this.togglecount) {
+            case 0:
+                this.directed = false;
+                break;
+            case 1:
+            case 2:
+                this.directed = true;
+                let aux = this.u;
+                this.u = this.v;
+                this.v = aux;
+                this.height *= -1;
+                break;
+        }
+        this.togglecount = (this.togglecount + 1) % 3;
     }
 
     contains(x, y) {
-        return ptopdist(this.u.x, this.u.y, x, y) + ptopdist(x, y, this.v.x, this.v.y) - ptopdist(this.u.x, this.u.y, this.v.x, this.v.y) < 0.3;
+        let baseangle = anglefromline(this.v.x, this.v.y, this.u.x, this.u.y);
+        let midpoint = {};
+        midpoint.x = (this.u.x + this.v.x) / 2;
+        midpoint.y = (this.u.y + this.v.y) / 2;
+        let dist = ptopdist(this.v.x, this.v.y, this.u.x, this.u.y);
+        for (let i = 1 * Math.PI; i < 2 * Math.PI; i += 0.01) {
+            let arcpoint = polartocartesian(midpoint, dist / 2, this.height, i);
+            arcpoint = rotateonpoint(arcpoint, midpoint, baseangle);
+            // stroke(240, 100, 50);
+            // ellipse(arcpoint.x, arcpoint.y, 5, 5);
+            if ((x - arcpoint.x) * (x - arcpoint.x) + (y - arcpoint.y) * (y - arcpoint.y) <= 5 * 5) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    update(x, y) {
+        let h = ptoldist(x, y, this.v.x, this.v.y, this.u.x, this.u.y);
+        h == 0 ? h = 0.001 : h;
+        let baseangle = anglefromline(this.v.x, this.v.y, this.u.x, this.u.y);
+        let midpoint = {};
+        midpoint.x = (this.u.x + this.v.x) / 2;
+        midpoint.y = (this.u.y + this.v.y) / 2;
+        let p = {x: x, y: y};
+        p = rotateonpoint(p, midpoint, -baseangle);
+        let pu = {x: this.u.x, y: this.u.y};
+        pu = rotateonpoint(pu, midpoint, -baseangle);
+        // console.log(this.v.x, pu.x, this.v.y, pu.y);
+        // stroke(240, 100, 50);
+        // point(pu.x, pu.y);
+        // point(p.x, p.y);
+        if (p.y < pu.y) {
+            this.height = h;
+        } else {
+            this.height = -h;
+        }
+        // console.log(this.height);
     }
 
     setlabel(label) {
@@ -114,20 +254,21 @@ class edge {
     }
 }
 
+
 class graph {
     constructor(oldgraph = null) {
         if (oldgraph == null) {
             this.nodes = [];
             this.edges = [];
-            this.selectedelement = -1; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
+            this.selectedelement = element.none; // type of the selected element [see const element]
             this.selectedindex = -1; // index of the selected element in the according type's array
             this.locked = false;
             this.allow_select = false;
         } else {
             this.nodes = [];
             this.edges = [];
-            this.selectedelement = oldgraph.selectedelement; // type of the selected element |  -1: none  |  0: node  |  1: edge  |
-            this.selectedindex = oldgraph.selectedindex; // index of the selected element in the according type's array
+            this.selectedelement = oldgraph.selectedelement;
+            this.selectedindex = oldgraph.selectedindex;
             this.locked = oldgraph.locked;
             this.allow_select = oldgraph.allow_select;
             for (let i = 0; i < oldgraph.nodes.length; i++) {
@@ -142,9 +283,10 @@ class graph {
             for (let i = 0; i < oldgraph.edges.length; i++) {
                 let e = oldgraph.edges[i];
                 let n = new edge(this.nodes[e.uidx], this.nodes[e.vidx]);
-                n.direction = e.direction;
+                n.directed = e.directed;
                 n.uidx = e.uidx;
                 n.vidx = e.vidx;
+                n.height = e.height;
                 n.hue = e.hue;
                 n.saturation = e.saturation;
                 n.lightness = e.lightness;
@@ -162,13 +304,29 @@ class graph {
         this.locked = false;
     }
 
-    get_edge_index(u, v) {
+    get_edges(u, v) {
+        let es = [];
+        // console.log(u);
+        // console.log(v);
+        // console.log("funcione porra");
         for (let i = 0; i < this.edges.length; i++) {
+            // console.log(this.edges[i].u);
+            // console.log(this.edges[i].v);
             if (
                 this.nodes.indexOf(this.edges[i].u) == u && this.nodes.indexOf(this.edges[i].v) == v ||
                 this.nodes.indexOf(this.edges[i].u) == v && this.nodes.indexOf(this.edges[i].v) == u ||
                 this.edges[i].u == u && this.edges[i].v == v || this.edges[i].v == u && this.edges[i].u == v
             ) {
+                es.push(i);
+            }
+        }
+        return es;
+    }
+
+    get_edge_index(u, v, h) {
+        let es = this.get_edges(u, v);
+        for (let i = 0; i < es.length; i++) {
+            if (this.edges[es[i]].height == height) {
                 return i;
             }
         }
@@ -183,16 +341,8 @@ class graph {
 
     addegde(u, v) {
         if (u != v) {
-            for (let i = 0; i < this.edges.length; i++) {
-                if (this.edges[i].u == u && this.edges[i].v == v) {
-                    warn("already added edge");
-                    return;
-                } else if (this.edges[i].u == v && this.edges[i].v == u) {
-                    warn("already added edge");
-                    return;
-                }
-            }
-            let e = new edge(u, v);
+            // let es = this.get_edges(u, v);
+            let e = new edge(u, v, 0);
             this.edges.push(e);
         }
         // console.log(this)
@@ -200,17 +350,9 @@ class graph {
 
     adddirectedegde(u, v) {
         if (u != v) {
-            for (let i = 0; i < this.edges.length; i++) {
-                if (this.edges[i].u == u && this.edges[i].v == v) {
-                    warn("already added edge");
-                    return;
-                } else if (this.edges[i].u == v && this.edges[i].v == u) {
-                    warn("already added edge");
-                    return;
-                }
-            }
-            let e = new edge(u, v);
-            e.direction = 0;
+            // let es = this.get_edges(u, v);
+            let e = new edge(u, v, 0);
+            e.directed = true;
             this.edges.push(e);
         }
         // console.log(this);
@@ -235,22 +377,22 @@ class graph {
     }
 
     removeselected() {
-        if (this.selectedelement == 0) this.removenode();
-        else if (this.selectedelement == 1) this.removeedge();
+        if (this.selectedelement == element.node) this.removenode();
+        else if (this.selectedelement == element.edge) this.removeedge();
     }
 
     select(x, y) {
         // nodes need to be checked first because they are visually on top of edges
         for (let i = this.nodes.length - 1; i >= 0; i--) {
             if (this.nodes[i].contains(x, y)) {
-                this.selectedelement = 0;
+                this.selectedelement = element.node;
                 this.selectedindex = i;
                 return;
             }
         }
         for (let i = this.edges.length - 1; i >= 0; i--) {
             if (this.edges[i].contains(x, y)) {
-                this.selectedelement = 1;
+                this.selectedelement = element.edge;
                 this.selectedindex = i;
                 return;
             }
@@ -259,26 +401,39 @@ class graph {
     }
 
     unselect() {
-        this.selectedelement = -1;
+        this.selectedelement = element.none;
         this.selectedindex = -1;
     }
 
     draw() {
         // edges need to be drawn first so that nodes are drawn on top of them
         for (let i = 0; i < this.edges.length; i++) {
-            if (this.selectedindex == i && this.selectedelement == 1) {
-                noFill(); stroke(100); strokeWeight(2);
-                push();
-                translate((this.edges[i].u.x + this.edges[i].v.x) / 2, (this.edges[i].u.y + this.edges[i].v.y) / 2);
-                rotate(lineangle(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y));
-                ellipse(0, 0, ptopdist(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y) / 2 - this.nodes[0].r, this.nodes[0].r);
-                pop();
+            if (this.selectedindex == i && this.selectedelement == element.edge) {
+                this.edges[i].draw(100);
+                // push();
+                // translate((this.edges[i].u.x + this.edges[i].v.x) / 2, (this.edges[i].u.y + this.edges[i].v.y) / 2);
+                // rotate(anglefromline(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y));
+                // let dist = ptopdist(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y);
+                // noFill(); stroke(100); strokeWeight(3);
+                // line(-dist / 2, 0, dist / 2, 0);
+                // // ellipse(0, 0, ptopdist(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y) / 2 - this.nodes[0].r, this.nodes[0].r);
+                // pop();
+            } else {
+                // let es = this.get_edges(this.edges[i].u, this.edges[i].v);
+                // console.log(es);
+                // console.log(this.edges);
+
+                // this.edges[es[0]].height = 0.01;
+                // for (let j = 1; j < es.length; j++) {
+                // let width = min(200, ptopdist(this.edges[i].u.x, this.edges[i].u.y, this.edges[i].v.x, this.edges[i].v.y));
+                // this.edges[es[j]].height = j * width / es.length;
+                // }
+                this.edges[i].draw();
             }
-            this.edges[i].draw();
         }
         for (let i = 0; i < this.nodes.length; i++) {
-            if (this.selectedindex == i && this.selectedelement == 0) {
-                noFill(); stroke(100); strokeWeight(2);
+            if (this.selectedindex == i && this.selectedelement == element.node) {
+                noFill(); stroke(100); strokeWeight(3);
                 ellipse(this.nodes[i].x, this.nodes[i].y, this.nodes[i].r + 1, this.nodes[i].r + 1);
             }
             this.nodes[i].draw();
@@ -305,18 +460,13 @@ class graph {
                 const v = this.nodes[j];
                 for (let k = 0; k < this.edges.length; k++) {
                     if (this.edges[k].u == u && this.edges[k].v == v) {
-                        switch (this.edges[k].direction) {
-                            case 0:
-                                adjmatrix[i][j] = 1;
-                                adjmatrix[j][i] = -1;
+                        switch (this.edges[k].directed) {
+                            case false:
+                                adjmatrix[i][j] += 1;
+                                adjmatrix[j][i] += 1;
                                 break;
-                            case 1:
-                                adjmatrix[i][j] = -1;
-                                adjmatrix[j][i] = 1;
-                                break;
-                            case 2:
-                                adjmatrix[i][j] = 2;
-                                adjmatrix[j][i] = 2;
+                            case true:
+                                adjmatrix[i][j] += 1;
                                 break;
                         }
                     }
@@ -333,16 +483,13 @@ class graph {
             adjlist.push([]);
             for (let j = 0; j < this.edges.length; j++) {
                 const e = this.edges[j];
-                switch (e.direction) {
-                    case 0:
-                        if (e.u == u) adjlist[i].push(this.nodes.indexOf(e.v));
-                        break;
-                    case 1:
-                        if (e.v == u) adjlist[i].push(this.nodes.indexOf(e.u));
-                        break;
-                    case 2:
+                switch (e.directed) {
+                    case false:
                         if (e.u == u) adjlist[i].push(this.nodes.indexOf(e.v));
                         if (e.v == u) adjlist[i].push(this.nodes.indexOf(e.u));
+                        break;
+                    case true:
+                        if (e.u == u) adjlist[i].push(this.nodes.indexOf(e.v));
                         break;
                 }
             }

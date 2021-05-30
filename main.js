@@ -10,6 +10,7 @@ let oldgraph;
 let ggraph;
 const MS_PER_STEP = 500;
 let multiplier = 1;
+let oldp;
 function setup() {
     ggraph = new graph();
     setcanvas();
@@ -23,6 +24,7 @@ function setup() {
     textStyle(BOLD);
     textFont("Courier New");
     textSize(20);
+    oldp = {x: 500, y: 500};
 }
 
 function warn(message) {
@@ -32,16 +34,40 @@ function warn(message) {
 function draw() {
     background("#1f1f1f");
 
+    // noFill(); stroke(100); strokeWeight(2);
+    // arc(500, 500, 50, 10, Math.PI, 0);
+
+    // let cx = 500;
+    // let cy = 500;
+    // let w = 100;
+    // let h = 200;
+    // for (let i = 0; i < 1 * Math.PI; i += 0.1) {
+    //     ex = w * Math.cos(i);
+    //     ey = h * Math.sin(i);
+    //     push();
+    //     // rotate(frameCount / 100);
+    //     point(cx + ex, cy + ey);
+    //     pop();
+    // }
+    // push();
+    // rotate(frameCount / 100);
+    // line(0, 0, 100, 0);
+    // pop();
+
+    // point(oldp.x, oldp.y);
+    // let c = {x: 550, y: 500};
+    // oldp = rotateonpoint(oldp, c, 0.1);
+
     if (!ggraph.locked) {
-        if (ggraph.selectedelement == 0) {
+        if (ggraph.selectedelement == element.node) {
             inputbox.value = ggraph.nodes[ggraph.selectedindex].label;
-        } else if (ggraph.selectedelement == 1) {
+        } else if (ggraph.selectedelement == element.edge) {
             inputbox.value = ggraph.edges[ggraph.selectedindex].label;
         } else {
             inputbox.value = "";
         }
 
-        if (ggraph.selectedelement == 0 && mouseIsPressed) {
+        if (ggraph.selectedelement == element.node && mouseIsPressed) {
             stroke(0, 95, 60); strokeWeight(1);
             let dx = mouseX;
             let dy = mouseY;
@@ -98,7 +124,7 @@ function setcanvas() {
     canvas.elt.addEventListener("dblclick", () => {
         if (!ggraph.locked) {
             if (mouseX <= windowWidth * 0.17) return;
-            if (ggraph.selectedelement == -1) {
+            if (ggraph.selectedelement == element.none) {
                 ggraph.addnode(mouseX, mouseY, 20);
             }
         }
@@ -108,7 +134,7 @@ function setcanvas() {
         if (!ggraph.locked || ggraph.allow_select) {
             if (mouseX <= windowWidth * 0.17) return;
             ggraph.select(mouseX, mouseY);
-            if (ggraph.selectedelement != -1) {
+            if (ggraph.selectedelement != element.none) {
                 inputbox.focus();
             }
         }
@@ -118,7 +144,7 @@ function setcanvas() {
         if (!ggraph.locked) {
             if (mouseX <= windowWidth * 0.17) return;
             ggraph.select(mouseX, mouseY);
-            if (ggraph.selectedelement == 1) {
+            if (ggraph.selectedelement == element.edge) {
                 if (keyIsDown(CONTROL)) {
                     ggraph.edges[ggraph.selectedindex].toggledirection();
                 }
@@ -129,7 +155,7 @@ function setcanvas() {
     canvas.elt.addEventListener("mouseup", () => {
         if (!ggraph.locked) {
             if (mouseX <= windowWidth * 0.17) return;
-            if (ggraph.selectedelement != -1) {
+            if (ggraph.selectedelement != element.none) {
                 if (keyIsDown(SHIFT)) {
                     for (let i = ggraph.nodes.length - 1; i >= 0; i--) {
                         if (ggraph.nodes[i].contains(mouseX, mouseY)) {
@@ -153,9 +179,14 @@ function setcanvas() {
         if (!ggraph.locked) {
             if (mouseX <= windowWidth * 0.17) return;
             if (mouseIsPressed) {
-                if (ggraph.selectedelement == 0) {
+                if (ggraph.selectedelement == element.node) {
                     if (!keyIsDown(SHIFT) && !keyIsDown(CONTROL)) {
                         ggraph.nodes[ggraph.selectedindex].update(mouseX, mouseY);
+                    }
+                }
+                if (ggraph.selectedelement == element.edge) {
+                    if (!keyIsDown(SHIFT) && !keyIsDown(CONTROL)) {
+                        ggraph.edges[ggraph.selectedindex].update(mouseX, mouseY);
                     }
                 }
             }
@@ -209,9 +240,9 @@ function setsidebar() {
     inputbox.id = "inputbox";
     inputbox.placeholder = "edit label";
     inputbox.addEventListener("input", (e) => {
-        if (ggraph.selectedelement == 0) {
+        if (ggraph.selectedelement == element.node) {
             ggraph.nodes[ggraph.selectedindex].setlabel(inputbox.value);
-        } else if (ggraph.selectedelement == 1) {
+        } else if (ggraph.selectedelement == element.edge) {
             ggraph.edges[ggraph.selectedindex].setlabel(inputbox.value);
         }
     });
@@ -283,12 +314,12 @@ function setsidebar() {
 
                     ggraph.unselect();
                     warn("primeiro escolha o nó de partida");
-                    while (ggraph.selectedelement != 0) await sleep(50);
+                    while (ggraph.selectedelement != element.node) await sleep(50);
                     let source = ggraph.selectedindex;
                     ggraph.unselect();
 
                     warn("agora escolha o nó de destino");
-                    while (ggraph.selectedelement != 0 || source == ggraph.selectedindex) await sleep(50);
+                    while (ggraph.selectedelement != element.node || source == ggraph.selectedindex) await sleep(50);
                     let target = ggraph.selectedindex;
                     ggraph.unselect();
 
@@ -324,7 +355,7 @@ function setsidebar() {
     //savebutton
     let savebutton = document.createElement("button");
     sidebardiv.appendChild(savebutton);
-    savebutton.innerHTML = "save current state";
+    savebutton.innerHTML = "save current graph";
     savebutton.addEventListener("click", (e) => {
         if (!ggraph.locked) {
             oldgraph = new graph(ggraph);
@@ -334,7 +365,7 @@ function setsidebar() {
     //loadbutton
     let loadbutton = document.createElement("button");
     sidebardiv.appendChild(loadbutton);
-    loadbutton.innerHTML = "load last saved state";
+    loadbutton.innerHTML = "load last saved graph";
     loadbutton.addEventListener("click", (e) => {
         if (!ggraph.locked) {
             ggraph = oldgraph;
@@ -348,7 +379,7 @@ function setsidebar() {
     warning.style.overflowY = "auto";
     warning.style.flexGrow = "2";
     warning.style.userSelect = "none";
-    warning.style.border = "1px solid red";
+    warning.style.border = "5px solid #120a8f";
     warning.style.backgroundColor = "snow";
     warning.innerHTML = "";
 

@@ -17,7 +17,7 @@ function isempty() {
 
 function isdirected() {
     for (let i = 0; i < ggraph.edges.length; i++) {
-        if (ggraph.edges[i].direction == 2) {
+        if (!ggraph.edges[i].directed) {
             return false;
         }
     }
@@ -26,7 +26,7 @@ function isdirected() {
 
 function isundirected() {
     for (let i = 0; i < ggraph.edges.length; i++) {
-        if (ggraph.edges[i].direction != 2) {
+        if (ggraph.edges[i].directed) {
             return false;
         }
     }
