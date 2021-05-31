@@ -62,7 +62,9 @@ async function Johnsons(source, target) {
     }
     await code.print(5, 1500);
     warn("A menor distância entre os dois vértices escolhidos é de: " + ggraph.nodes[target].label);
+
 }
+
 async function Bellman() {
     let algo = new algorithm();
     algo.add_step("Bellman-Ford:\n   G é um grafo com n nós.")
