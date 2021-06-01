@@ -12,14 +12,18 @@ function non_valid_labels() {
 }
 
 async function boruvka() {
-    warn("");
-    console.log(ggraph);
+    // warn("");
+    // console.log(ggraph);
     if (!only_edges_with_label()) {
-        warn("Todas as arestas devem conter custos.");
+        warn("ERRO: Todas as arestas devem conter custos.");
         return;
     }
     if (non_valid_labels()) {
-        warn("Todas as arestas devem conter apenas números.");
+        warn("ERRO: Todas as arestas devem conter apenas números.");
+        return;
+    }
+    if (isempty()) {
+        warn("ERRO: Grafo vazio");
         return;
     }
     // all requirements are met, start the algorithm

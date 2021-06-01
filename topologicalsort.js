@@ -108,6 +108,10 @@
 // }
 
 async function topologicalsort() {
+    if (isempty()) {
+        warn("ERRO: Grafo vazio");
+        return;
+    }
     // if (isempty()) {
     //     warn("empty graph");
     //     return;
@@ -157,7 +161,7 @@ async function topologicalsort() {
     algo.add_step("output: uma ordenação topológica dos vértices do grafo");
 
     let adjacency_matrix = ggraph.get_adjacency_matrix();
-    console.log(adjacency_matrix);
+    // console.log(adjacency_matrix);
     // return;
 
     async function topologicalsortdfs(node) {
@@ -219,28 +223,6 @@ async function topologicalsort() {
                     return;
                 }
             }
-            // switch (adjacency_matrix[node][i]) {
-            //     case 1:
-            //         ggraph.selectedindex = adjacency_matrix[node];
-            //         await algo.print(13);
-            //         let es = ggraph.get_edges(node, i);
-            //         for (let j = 0; j < es.length; j++) {
-            //             ggraph.edges[es[j]].hue = 180;
-            //         }
-            //         await algo.print(14);
-            //         await topologicalsortdfs(i);
-            //         if (undirected.found) return;
-            //         if (foundcycle.length > 0) {
-            //             foundcycle.push(node);
-            //             return;
-            //         }
-            //         break;
-            //     case 2:
-            //         undirected.found = true;
-            //         undirected.u = node;
-            //         undirected.v = i;
-            //         return;
-            // }
         }
         ggraph.nodes[node].hue = 0; //vermelho
         marked[node] = true;
@@ -318,7 +300,8 @@ async function topologicalsort() {
             for (let j = 0; j < es.length; j++) {
                 if (!ggraph.edges[es[j]].directed) {
                     ggraph.edges[es[j]].hue = 240;
-                    message = "graph has an undirected edge: (blue) </br> ";
+                    message = "ERRO: O grafo não é direcionado </br> ";
+                    message += "(aresta em azul) </br> ";
                     message += `${ggraph.edges[es[j]].label}`;
                     break;
                 }
@@ -334,7 +317,8 @@ async function topologicalsort() {
             for (let i = 0; i < ggraph.edges.length; i++) {
                 ggraph.edges[i].hue = 0;
             }
-            message = "graph has a cycle: (blue) </br> ";
+            message = "ERRO: O grafo não é acíclico </br> ";
+            message += "(ciclo em azul) </br> ";
             message2 = `${ggraph.nodes[foundcycle[0]].label}`;
             for (let i = 1; i < foundcycle.length; i++) {
                 ggraph.nodes[foundcycle[i]].hue = 180;
@@ -380,10 +364,5 @@ async function topologicalsort() {
     //         }
     //     }
     //     orphans.shift();
-    // }
-
-    // for (let i = 0; i < ggraph.nodes.length; i++) {
-    //     ggraph.nodes[i].label = "";    
-    //     ggraph.nodes[i].hue = 0;
-    // }    
+    // }   
 }

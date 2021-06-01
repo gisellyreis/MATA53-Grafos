@@ -250,6 +250,7 @@ function setsidebar() {
     //algorithmselect
     const algorithmselect = document.createElement("select");
     sidebardiv.appendChild(algorithmselect);
+    algorithmselect.style.userSelect = "none";
     const placeholderoption = document.createElement("option");
     placeholderoption.value = "";
     placeholderoption.innerHTML = "Select an algorithm";
@@ -274,10 +275,13 @@ function setsidebar() {
     label.innerHTML = `Speed: 1x`;
     sidebardiv.appendChild(label);
     label.htmlFor = "speedmult";
+    label.style.userSelect = "none";
     label.style.color = "white";
+    label.style.marginTop = "10px";
 
     let speedmult = document.createElement("input");
     sidebardiv.appendChild(speedmult);
+    speedmult.style.marginTop = 0;
     speedmult.addEventListener("input", (e) => {
         multiplier = speedmult.value;
         label.innerHTML = `Speed: ${speedmult.value}x`;
@@ -287,77 +291,47 @@ function setsidebar() {
     speedmult.max = 2;
     speedmult.step = 0.25;
     speedmult.value = 1;
-    speedmult.id = speedmult.name = "speedmult";
+    // speedmult.id = speedmult.name = "speedmult";
 
     //runbutton
     runbutton = document.createElement("button");
     sidebardiv.appendChild(runbutton);
+    runbutton.style.userSelect = "none";
     runbutton.innerHTML = "run algorithm";
     runbutton.addEventListener("click", async (e) => {
         if (!ggraph.locked) {
             // console.log(algorithmselect.value);
-            oldgraph = new graph(ggraph);
+            // oldgraph = new graph(ggraph);
+            warn("");
+            ggraph.lock();
+            ggraph.unselect();
+            algoBox.style.visibility = "visible";
             switch (algorithmselect.value) {
                 case "boruvka":
-                    warn("");
-                    ggraph.lock();
-                    ggraph.unselect();
-                    algoBox.style.visibility = "visible";
                     await boruvka();
-                    algoBox.style.visibility = "hidden";
-                    ggraph.unlock();
                     break;
                 case "johnsons":
-                    ggraph.lock();
-                    ggraph.allow_select = true;
-                    algoBox.style.visibility = "visible";
-
-                    ggraph.unselect();
-                    warn("primeiro escolha o nó de partida");
-                    while (ggraph.selectedelement != element.node) await sleep(50);
-                    let source = ggraph.selectedindex;
-                    ggraph.unselect();
-
-                    warn("agora escolha o nó de destino");
-                    while (ggraph.selectedelement != element.node || source == ggraph.selectedindex) await sleep(50);
-                    let target = ggraph.selectedindex;
-                    ggraph.unselect();
-
-                    warn("");
-                    console.log(source, target);
-
-                    await Johnsons(source, target);
-
-                    algoBox.style.visibility = "hidden";
-                    ggraph.allow_select = false;
-                    ggraph.unlock();
+                    await Johnsons();
                     break;
                 case "topologicalsort":
-                    warn("");
-                    ggraph.lock();
-                    ggraph.unselect();
-
-                    let oldnodes = ggraph.nodes.slice();
-                    algoBox.style.visibility = "visible";
                     await topologicalsort();
-                    algoBox.style.visibility = "hidden";
-                    ggraph.nodes = oldnodes;
-
-                    ggraph.unlock();
                     break;
                 default:
-                    warn("no algorithm selected");
+                    warn("Selecione um algoritmo");
                     break;
             }
+            algoBox.style.visibility = "hidden";
+            ggraph.unlock();
         }
     });
 
     //savebutton
     let savebutton = document.createElement("button");
     sidebardiv.appendChild(savebutton);
+    savebutton.style.userSelect = "none";
     savebutton.innerHTML = "save current graph";
     savebutton.addEventListener("click", (e) => {
-        if (!ggraph.locked) {
+        if (!ggraph.locked && !isempty()) {
             oldgraph = new graph(ggraph);
         }
     });
@@ -365,9 +339,10 @@ function setsidebar() {
     //loadbutton
     let loadbutton = document.createElement("button");
     sidebardiv.appendChild(loadbutton);
+    loadbutton.style.userSelect = "none";
     loadbutton.innerHTML = "load last saved graph";
     loadbutton.addEventListener("click", (e) => {
-        if (!ggraph.locked) {
+        if (!ggraph.locked && oldgraph) {
             ggraph = oldgraph;
         }
     });
@@ -386,6 +361,7 @@ function setsidebar() {
     //clearbutton
     clearbutton = document.createElement("button");
     sidebardiv.appendChild(clearbutton);
+    clearbutton.style.userSelect = "none";
     clearbutton.innerHTML = "clear all nodes";
     clearbutton.addEventListener("click", (e) => {
         if (!ggraph.locked) {
