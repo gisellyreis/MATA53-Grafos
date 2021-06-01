@@ -10,7 +10,7 @@ let oldgraph;
 let ggraph;
 const MS_PER_STEP = 500;
 let multiplier = 1;
-let oldp;
+// let oldp;
 function setup() {
     ggraph = new graph();
     setcanvas();
@@ -24,7 +24,7 @@ function setup() {
     textStyle(BOLD);
     textFont("Courier New");
     textSize(20);
-    oldp = {x: 500, y: 500};
+    // oldp = {x: 500, y: 500};
 }
 
 function warn(message) {
@@ -199,6 +199,13 @@ function windowResized() {
     const x = (windowWidth - width) / 2;
     const y = (windowHeight - height) / 2;
     canvas.position(x, y);
+    ellipseMode(RADIUS);
+    frameRate(30);
+    colorMode(HSL);
+    textAlign(CENTER, CENTER);
+    textStyle(BOLD);
+    textFont("Courier New");
+    textSize(20);
     draw();
 }
 

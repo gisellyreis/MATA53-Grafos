@@ -54,7 +54,7 @@ class node {
         fill(this.hue, this.saturation, this.lightness); noStroke();
         ellipse(this.x, this.y, this.r, this.r);
 
-        fill(90); stroke(0); strokeWeight(2);
+        fill(90); stroke(0); strokeWeight(5);
         text(this.label, this.x, this.y);
     }
 
@@ -179,7 +179,7 @@ class edge {
         rotate(baseangle);
         translate(0, -this.height);
         rotate(-baseangle);
-        fill(90); stroke(0); strokeWeight(2);
+        fill(90); stroke(0); strokeWeight(5);
         text(this.label, 0, 0);
         pop();
     }
