@@ -1,6 +1,6 @@
-# MATA53 - Teoria dos Grafos - Visualização de Algoritmos em Grafos
+### MATA53 - Teoria dos Grafos - Visualização de Algoritmos em Grafos
 
-## Links para o projeto: [`[1]`](https://brunonom.github.io/topological-sorting-visualizer/) [`[2]`]((https://viniciusth.github.io/boruvka-visualizer/))
+#### Links para o projeto: [`[1]`](https://brunonom.github.io/topological-sorting-visualizer/) [`[2]`](https://viniciusth.github.io/boruvka-visualizer/)
 
 | Integrante                      | Matrícula | Algoritmo                                                                       | Repositório                                                |
 | ------------------------------- | --------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------- |
@@ -9,4 +9,4 @@
 | Vinícius Teixeira Hirschle      | 218123937 | [Borůvka's Algorithm](https://en.wikipedia.org/wiki/Bor%C5%AFvka%27s_algorithm) | https://github.com/viniciusth/boruvka-visualizer           |
 
 
-### Este projeto foi desenvolvido com a biblioteca [p5.js](https://p5js.org/), do zero e completamente em Javascript.
+##### Este projeto foi desenvolvido com a biblioteca [p5.js](https://p5js.org/), do zero e completamente em Javascript.
