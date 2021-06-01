@@ -223,14 +223,14 @@ function setsidebar() {
     instructions.style.userSelect = "none";
     instructions.innerHTML = `
     CONTROLS: <br/> <br/>
-    - add node: double click <br/> <br/>
-    - move node: click + drag <br/> <br/>
+    - add vertex: double click <br/> <br/>
+    - move object: click + drag <br/> <br/>
     - add undirected edge: shift + drag <br/> <br/>
     - add directed edge: ctrl + drag <br/> <br/>
     - toggle edge direction: crtl + click <br/> <br/>
-    - select element: click <br/> <br/>
+    - select object: click <br/> <br/>
     - edit label: select + type <br/> <br/>
-    - delete element: select + DEL
+    - delete object: select + DEL
     `;
 
     //inputbox
