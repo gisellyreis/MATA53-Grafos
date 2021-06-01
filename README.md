@@ -3,7 +3,7 @@
 Este projeto é o trabalho final da matéria MATA53 - Teoria dos Grafos, lecionada pelo professor Tiago de Oliveira Januário em 2021.1 na Universidade Federal da Bahia.
 O desafio proposto foi de demonstrar visualmente a execução de algum algoritmo em grafos.
 
-Para fazê-lo, criamos um visualizador interativo que permite que o usuário desenhe um grafo qualquer e veja como algum dos algoritmos que escolhemos é executado nele.
+O trabalho foi feito em Javascript, utilizamos a biblioteca [p5.js](https://p5js.org/) para criar um visualizador interativo que permite que o usuário desenhe um grafo qualquer e veja como algum dos algoritmos que escolhemos é executado nele.
 
 ---
 
