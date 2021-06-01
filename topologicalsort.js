@@ -296,6 +296,9 @@ async function topologicalsort() {
             for (let i = 0; i < ggraph.nodes.length; i++) {
                 ggraph.nodes[i].hue = 120;
             }
+            for (let i = 0; i < ggraph.edges.length; i++) {
+                ggraph.edges[i].hue = 0;
+            }
             let es = ggraph.get_edges(undirected.u, undirected.v);
             for (let j = 0; j < es.length; j++) {
                 if (!ggraph.edges[es[j]].directed) {
@@ -342,6 +345,17 @@ async function topologicalsort() {
     }
     for (let i = 0; i < ggraph.edges.length; i++) {
         ggraph.edges[i].hue = 0;
+    }
+    let howmanyedges = 0;
+    for (let i = 0; i < ggraph.edges.length; i++) {
+        let es = ggraph.get_edges(ggraph.edges[i].u, ggraph.edges[i].v);
+        for (j = 0; j < es.length; j++) {
+            let e = ggraph.edges[es[j]];
+            // console.log(e);
+            ggraph.edges[es[j]].height = min(ptopdist(e.u.x, e.u.y, e.v.x, e.v.y), windowHeight * 0.4);
+            // howmanyedges++;
+        }
+        // if (howmanyedges == ggraph.edges.length) break;
     }
     return;
 
