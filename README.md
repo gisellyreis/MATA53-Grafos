@@ -24,6 +24,7 @@ Para rodar o projeto, você pode baixar o código desse repositório (ou qualque
 Alternativamente, você pode visitar o projeto online em qualquer um desses links (eles também são idênticos):
 - https://brunonom.github.io/topological-sorting-visualizer/
 - https://viniciusth.github.io/boruvka-visualizer/
+- https://gisellyreis.github.io/graph-algorithms-viewer/
 
 Após desenhar o grafo, você pode escolher um algoritmo e executá-lo sobre o grafo que você desenhou.
 
